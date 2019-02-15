@@ -32,6 +32,10 @@ function SmartglassDevice(log, config) {
           uri: 'appx:4DF9E0F8.Netflix_mcm4njqhnhss8!App'
       },
       4: {
+          name: 'Youtube',
+          uri: 'appx:GoogleInc.YouTube_yfg5n0ztvskxp!App'
+      },
+      5: {
           name: 'Airserver',
           uri: 'appx:F3F176BD.53203526D8F6C_p8qzvses5c8me!App'
       }
@@ -86,7 +90,12 @@ function SmartglassDevice(log, config) {
     this.apps[identifier].service = new Service.InputSource(this.apps[identifier].name, this.apps[identifier].name);
     this.apps[identifier].service.setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED);
     this.apps[identifier].service.setCharacteristic(Characteristic.ConfiguredName, this.apps[identifier].name);
-    this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.TV);
+
+    if(identifier == '1')
+        this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.TV);
+    else
+        this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APP);
+
     this.apps[identifier].service.setCharacteristic(Characteristic.Identifier, identifier);
 
     device_service.addLinkedService(this.apps[identifier].service);
