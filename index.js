@@ -18,14 +18,42 @@ function SmartglassDevice(log, config) {
   this.consoleip = config.consoleip;
   this.restClient = SmartglassRest(config.address, config.port);
 
-  this.log("Registering Television Service...");
+  this.apps = {
+      1: {
+          name: 'TV',
+          uri: 'appx:Microsoft.Xbox.LiveTV_8wekyb3d8bbwe!Microsoft.Xbox.LiveTV.Application'
+      },
+      2: {
+          name: 'Spotify',
+          uri: 'appx:SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App'
+      },
+      3: {
+          name: 'Netflix',
+          uri: 'appx:4DF9E0F8.Netflix_mcm4njqhnhss8!App'
+      },
+      4: {
+          name: 'Airserver',
+          uri: 'appx:F3F176BD.53203526D8F6C_p8qzvses5c8me!App'
+      }
+  }
 
+  var platform = this;
+
+  this.log("Registering Television Service...");
   var device_service = new Service.Television(this.name);
   device_service.setCharacteristic(Characteristic.ConfiguredName, this.name);
   device_service.setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+  device_service.setCharacteristic(Characteristic.ActiveIdentifier, 1);
+  device_service.getCharacteristic(Characteristic.ActiveIdentifier)
+                .on('set', function(newValue, callback) {
+                    platform.log("Launching app: "+platform.apps[newValue].name);
+                    platform.restClient.launchApp(platform.liveid, platform.apps[newValue].uri, function(success){
+                        platform.log("App launched: "+platform.apps[newValue].name);
+                        callback(null);
+                    });
+                });
 
-   this.log("Registering Information Service...");
-
+  this.log("Registering Information Service...");
   var info_service = new Service.AccessoryInformation();
   info_service.setCharacteristic(Characteristic.Manufacturer, 'Microsoft');
   info_service.setCharacteristic(Characteristic.Model, "Xbox One");
@@ -37,24 +65,34 @@ function SmartglassDevice(log, config) {
                 .on('set', this.set_power_state.bind(this));
 
   this.log("Registering Volume Service...");
-
   var volume_service = new Service.TelevisionSpeaker(this.name + ' Volume');
   volume_service.setCharacteristic(Characteristic.Active, Characteristic.Active.ACTIVE)
                 .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
-  volume_service
-                .getCharacteristic(Characteristic.VolumeSelector)
+  volume_service.getCharacteristic(Characteristic.VolumeSelector)
                 .on('set', (state, callback) =>{
                     this.set_volume_state(state, callback);
                 });
   device_service.addLinkedService(volume_service);
 
-
   this.log("Registering Key Service...");
-
   device_service.getCharacteristic(Characteristic.RemoteKey)
                 .on('set', this.set_key_state.bind(this));
 
   this.service = [info_service, device_service, volume_service];
+
+  this.log("Registering InputSource Service...");
+
+  for(var identifier in this.apps){
+    this.apps[identifier].service = new Service.InputSource(this.apps[identifier].name, this.apps[identifier].name);
+    this.apps[identifier].service.setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED);
+    this.apps[identifier].service.setCharacteristic(Characteristic.ConfiguredName, this.apps[identifier].name);
+    this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.TV);
+    this.apps[identifier].service.setCharacteristic(Characteristic.Identifier, identifier);
+
+    device_service.addLinkedService(this.apps[identifier].service);
+
+    this.service.push(this.apps[identifier].service);
+  }
 }
 
 SmartglassDevice.prototype.get_power_state = function(callback)
