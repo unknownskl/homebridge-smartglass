@@ -1,6 +1,7 @@
 var Service, Characteristic, HomebridgeAPI;
 var SmartglassRest = require('./xbox-smartglass-rest-client');
 var Smartglass = require('xbox-smartglass-core-node');
+var Package = require('./package.json');
 
 module.exports = function(homebridge) {
 
@@ -22,9 +23,13 @@ function SmartglassDevice(log, config) {
   var device_service = new Service.Television(this.name);
   device_service.setCharacteristic(Characteristic.ConfiguredName, this.name);
   device_service.setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
-  // device_service.setCharacteristic(Characteristic.Manufacturer, 'Microsoft');
-  // device_service.setCharacteristic(Characteristic.Model, "Xbox One");
-  // device_service.setCharacteristic(Characteristic.SerialNumber, "FD000000000000");
+
+  var info_service = new Service.AccessoryInformation();
+  info_service.setCharacteristic(Characteristic.Manufacturer, 'Microsoft');
+  info_service.setCharacteristic(Characteristic.Model, "Xbox One");
+  info_service.setCharacteristic(Characteristic.SerialNumber, this.liveid);
+  info_service.setCharacteristic(Characteristic.FirmwareRevision, Package.version);
+
   device_service.getCharacteristic(Characteristic.Active)
                 .on('get', this.get_power_state.bind(this))
                 .on('set', this.set_power_state.bind(this));
@@ -45,12 +50,13 @@ function SmartglassDevice(log, config) {
                 );
   device_service.addLinkedService(volume_service);
 
+
   this.log("Registering Key Service...");
 
   device_service.getCharacteristic(Characteristic.RemoteKey)
                 .on('set', this.set_key_state.bind(this));
 
-  this.service = [device_service, volume_service];
+  this.service = [info_service, device_service, volume_service];
 }
 
 SmartglassDevice.prototype.get_power_state = function(callback)
@@ -158,10 +164,12 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 
         if(key_type == 'input'){
             this.restClient.sendInput(this.liveid, input_key, function(success){
+                platform.log("Send input key:", input_key);
                 callback();
             });
         } else {
             this.restClient.sendMedia(this.liveid, input_key, function(success){
+                platform.log("Send media key:", input_key);
                 callback();
             });
         }
@@ -174,9 +182,11 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
         if (state == 0)
         {
             this.restClient.sendIr(this.liveid, 'tv/vol_up', function(success){
+                platform.log("Send ir command:", 'tv/vol_up');
             });
         } else {
             this.restClient.sendIr(this.liveid, 'tv/vol_down', function(success){
+                platform.log("Send ir command:", 'tv/vol_down');
             });
         }
         callback();
@@ -184,4 +194,17 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
 
 SmartglassDevice.prototype.getServices = function() {
   return this.service;
+}
+
+SmartglassDevice.prototype.getManufacturer = function() {
+    return 'Microsoft';
+}
+
+SmartglassDevice.prototype.getModel = function() {
+    return 'Xbox One';
+}
+
+SmartglassDevice.prototype.getFirmwareVersion = function() {
+    var package = require('./package.json');
+    return package.version;
 }
