@@ -51,6 +51,19 @@ module.exports = function(address, port)
             });
         },
 
+        launchApp: function(liveid, uri, callback){
+            request(this._getServerAddress('device/'+liveid+'/launch/'+uri), function (error, response, body) {
+                if(error){
+                    console.log('Error:', error);
+                    callback({});
+                } else {
+                    var JsonObject = JSON.parse(body);
+
+                    callback(JsonObject.success)
+                }
+            });
+        },
+
         powerOn: function(liveid, callback){
             request(this._getServerAddress('device/'+liveid+'/poweron'), function (error, response, body) {
                 if(error){
