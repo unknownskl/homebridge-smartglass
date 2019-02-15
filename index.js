@@ -60,22 +60,24 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 
     platform.restClient.getDevice(this.liveid, function(device){
         if(device.connection_state == 'Connected'){
+            platform.log("Device is on");
             callback(null, true);
         } else {
-            var runOnce = true;
+            // var runOnce = true;
+            //
+            // Smartglass.discovery({
+            //     ip: platform.consoleip // Your consoles ip address (Optional)
+            // }, function(device, address){
+            //     if(runOnce == true)
+            //     {
+            //         platform.restClient.connect(platform.liveid, function(success){
+            //             platform.log('Connecting to console')
+            //         });
+            //     }
+            //     runOnce = false;
+            // });
 
-            Smartglass.discovery({
-                ip: platform.consoleip // Your consoles ip address (Optional)
-            }, function(device, address){
-                if(runOnce == true)
-                {
-                    platform.restClient.connect(platform.liveid, function(success){
-                        platform.log('Connecting to console')
-                    });
-                }
-                runOnce = false;
-            });
-
+            platform.log("Device is off");
             callback(null, false)
         }
     })
@@ -87,6 +89,7 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
         platform.log("Setting Device Power State...");
         if(state === 0){
             platform.restClient.powerOff(this.liveid, function(success){
+                platform.log("Send power off command");
                 callback();
             });
         } else {
@@ -98,6 +101,8 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
                 tries: 4, // Number of packets too issue the boot command (Optional)
                 ip: platform.consoleip // Your consoles ip address (Optional)
             }, function(result){
+                platform.log("Send power on command");
+
                 platform.restClient.connect(platform.liveid, function(success){
                     platform.log('Connecting to console')
                 })
