@@ -70,11 +70,7 @@ SmartglassDevice.prototype.get_power_state = function(callback)
                 if(runOnce == true)
                 {
                     platform.restClient.connect(platform.liveid, function(success){
-                        if(success == true){
-                            this.log('Connected to console')
-                        } else {
-                            this.log('Failed to connect to console')
-                        }
+                        platform.log('Connecting to console')
                     });
                 }
                 runOnce = false;
@@ -87,9 +83,10 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 
 SmartglassDevice.prototype.set_power_state = function(state, callback)
 {
-        this.log("Setting Device Power State...");
+        var platform = this;
+        platform.log("Setting Device Power State...");
         if(state === 0){
-            this.restClient.powerOff(this.liveid, function(success){
+            platform.restClient.powerOff(this.liveid, function(success){
                 callback();
             });
         } else {
@@ -97,10 +94,13 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
             //     callback();
             // });
             Smartglass.power_on({
-                live_id: this.liveid, // Put your console's live id here (Required)
+                live_id: platform.liveid, // Put your console's live id here (Required)
                 tries: 4, // Number of packets too issue the boot command (Optional)
-                ip: this.consoleip // Your consoles ip address (Optional)
+                ip: platform.consoleip // Your consoles ip address (Optional)
             }, function(result){
+                platform.restClient.connect(platform.liveid, function(success){
+                    platform.log('Connecting to console')
+                })
                 callback();
             });
         }
