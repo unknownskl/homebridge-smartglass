@@ -18,11 +18,13 @@ function SmartglassDevice(log, config) {
   this.consoleip = config.consoleip;
   this.restClient = SmartglassRest(config.address, config.port);
 
-  this.log("Registering Device Service...");
+  this.log("Registering Television Service...");
 
   var device_service = new Service.Television(this.name);
   device_service.setCharacteristic(Characteristic.ConfiguredName, this.name);
   device_service.setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+
+   this.log("Registering Information Service...");
 
   var info_service = new Service.AccessoryInformation();
   info_service.setCharacteristic(Characteristic.Manufacturer, 'Microsoft');
@@ -41,13 +43,9 @@ function SmartglassDevice(log, config) {
                 .setCharacteristic(Characteristic.VolumeControlType, Characteristic.VolumeControlType.ABSOLUTE);
   volume_service
                 .getCharacteristic(Characteristic.VolumeSelector)
-                .on
-                (
-                        'set', (state, callback) =>
-                        {
-                                this.set_volume_state(state, callback);
-                        }
-                );
+                .on('set', (state, callback) =>{
+                    this.set_volume_state(state, callback);
+                });
   device_service.addLinkedService(volume_service);
 
 
@@ -119,7 +117,8 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
 
 SmartglassDevice.prototype.set_key_state = function(state, callback)
 {
-        this.log("Setting key state...");
+        var platform = this;
+        platform.log("Setting key state...");
         var input_key;
         var key_type;
         switch (state)
@@ -177,7 +176,8 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 
 SmartglassDevice.prototype.set_volume_state = function(state, callback)
 {
-        this.log("Setting Volume State...");
+        var platform = this;
+        platform.log("Setting Volume State...");
 
         if (state == 0)
         {
