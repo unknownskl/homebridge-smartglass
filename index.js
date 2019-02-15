@@ -62,13 +62,25 @@ SmartglassDevice.prototype.get_power_state = function(callback)
         if(device.connection_state == 'Connected'){
             callback(null, true);
         } else {
-            platform.restClient.connect(platform.liveid, function(success){
-                if(success == true){
-                    callback(null, true)
-                } else {
-                    callback(null, false)
+            var runOnce = true;
+
+            Smartglass.discovery({
+                ip: platform.consoleip // Your consoles ip address (Optional)
+            }, function(device, address){
+                if(runOnce == true)
+                {
+                    platform.restClient.connect(platform.liveid, function(success){
+                        if(success == true){
+                            this.log('Connected to console')
+                        } else {
+                            this.log('Failed to connect to console')
+                        }
+                    });
                 }
+                runOnce = false;
             });
+
+            callback(null, false)
         }
     })
 }
@@ -153,15 +165,15 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 SmartglassDevice.prototype.set_volume_state = function(state, callback)
 {
         this.log("Setting Volume State...");
-        // var volume_promise;
-        // if (state == 0)
-        // {
-        //         volume_promise = this.device.control.volume.up();
-        // }
-        // else
-        // {
-        //         volume_promise = this.device.control.volume.down();
-        // }
+
+        if (state == 0)
+        {
+            this.restClient.sendIr(this.liveid, 'tv/vol_up', function(success){
+            });
+        } else {
+            this.restClient.sendIr(this.liveid, 'tv/vol_down', function(success){
+            });
+        }
         callback();
 }
 
