@@ -18,7 +18,11 @@ Using docker you can get the xbox-smartglass-rest-python server up in no-time. U
         ports:
         - 5557:5557
 
-Add in your config the Accessory:
+Install the plugin:
+
+    npm install -g homebridge-smartglass
+
+Add the Accessory in your Homebridge config:
 
     "accessories": [
         {
