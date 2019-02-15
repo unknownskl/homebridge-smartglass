@@ -1,6 +1,7 @@
 # Homebridge-Smartglass
 
 This module is an Accessory plugin for Homebridge which allows you to control your Xbox using Homekit and the new Remote control introduced in iOS 12.2.
+Currently still in beta.
 
 Requirements:
 - xbox-smartglass-rest-python
@@ -8,7 +9,7 @@ Requirements:
 
 ### Easy way up?
 
-Using docker you can get the xbox-smartglass-rest-python server up in no-time. Use the following image to run.
+Using docker you can get the xbox-smartglass-rest-python server up in no-time. Use the following `docker-compose.yml` image to run the server in docker (Works on the Raspberry Pi).
 
     version: '2'
 
