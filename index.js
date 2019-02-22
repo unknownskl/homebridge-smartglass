@@ -109,27 +109,59 @@ SmartglassDevice.prototype.get_power_state = function(callback)
     var platform = this;
     platform.log("Getting Device Power State...");
 
-    platform.restClient.getDevice(this.liveid, function(device){
-        if(device.connection_state == 'Connected'){
+    platform.restClient.getDevice(platform.liveid, function(device){
+        platform.log(device);
+
+        if(device.success == false){
+            platform.log("Device not found on xbox-smartglass-rest server");
+            platform.restClient.discoverIp(platform.consoleip, function(result){
+                console.log(result);
+            });
+
+            callback(null, false);
+
+        } else if(device.connection_state != undefined && device.connection_state == 'Connected'){
             platform.log("Device is on");
             callback(null, true);
         } else {
-            // var runOnce = true;
-            //
-            // Smartglass.discovery({
-            //     ip: platform.consoleip // Your consoles ip address (Optional)
-            // }, function(device, address){
-            //     if(runOnce == true)
-            //     {
-            //         platform.restClient.connect(platform.liveid, function(success){
-            //             platform.log('Connecting to console')
-            //         });
-            //     }
-            //     runOnce = false;
-            // });
 
-            platform.log("Device is off");
-            callback(null, false)
+            var discovery = {
+                discovered: false,
+
+                ping: function(){
+                    this.discovered = true;
+                },
+
+                get: function(){
+                    return this.discovered;
+                }
+            }
+
+            Smartglass.discovery({
+                ip: platform.consoleip // Your consoles ip address (Optional)
+            }, function(device, address){
+                platform.log("Got discovery response");
+                discovery.ping();
+            });
+
+            var startTimestamp = Math.floor(Date.now() / 1000);
+            var interval = setInterval(function(){
+                var nowTimestamp = Math.floor(Date.now() / 1000);
+                if(discovery.get() === true){
+                    platform.log("Device is on, but not connected. Connecting...");
+                    platform.restClient.connect(platform.liveid, function(success){
+                        platform.log('Connected to console')
+                    })
+                    clearInterval(interval);
+                    callback(null, true);
+                }
+
+                if(nowTimestamp-startTimestamp >= 2){
+                    platform.log("No response for 2 sec. Device is probably off");
+                    clearInterval(interval);
+                    callback(null, false);
+                }
+            }.bind(discovery, interval), 100);
         }
     })
 }

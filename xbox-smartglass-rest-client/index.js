@@ -11,6 +11,14 @@ module.exports = function(address, port)
             return this.protocol+'://'+this.address+':'+this.port+'/'+page;
         },
 
+        discoverIp: function(address, callback){
+            request(this._getServerAddress('device?addr='+address), function (error, response, body) {
+                var JsonObject = JSON.parse(body);
+
+                callback(JsonObject.devices || JsonObject)
+            });
+        },
+
         getDevices: function(callback){
             request(this._getServerAddress('device'), function (error, response, body) {
                 if(error){
@@ -27,13 +35,15 @@ module.exports = function(address, port)
         getDevice: function(liveid, callback){
             request(this._getServerAddress('device/'+liveid), function (error, response, body) {
                 if(error){
-                    console.log('Console with the suppliedd liveid was never found by the xbox-smartglass-rest server');
+                    console.log('Console with the supplied liveid was not found by the xbox-smartglass-rest server');
                     console.log('Error:', error);
-                    callback({});
+                    callback({
+                        success: false
+                    });
                 } else {
                     var JsonObject = JSON.parse(body);
 
-                    callback(JsonObject.device)
+                    callback(JsonObject.device || JsonObject)
                 }
             });
         },
