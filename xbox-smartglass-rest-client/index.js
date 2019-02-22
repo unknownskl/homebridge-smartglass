@@ -13,9 +13,14 @@ module.exports = function(address, port)
 
         discoverIp: function(address, callback){
             request(this._getServerAddress('device?addr='+address), function (error, response, body) {
-                var JsonObject = JSON.parse(body);
+                if(error){
+                    console.log('Error:', error);
+                    callback({});
+                } else {
+                    var JsonObject = JSON.parse(body);
 
-                callback(JsonObject.devices || JsonObject)
+                    callback(JsonObject.devices || JsonObject)
+                }
             });
         },
 
