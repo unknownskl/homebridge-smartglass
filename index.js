@@ -19,25 +19,42 @@ function SmartglassDevice(log, config) {
   this.restClient = SmartglassRest(config.address, config.port);
 
   this.apps = {
+      0: {
+          name: 'Game',
+          uri: '',
+          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
+      },
       1: {
           name: 'TV',
-          uri: 'appx:Microsoft.Xbox.LiveTV_8wekyb3d8bbwe!Microsoft.Xbox.LiveTV.Application'
+          uri: 'Microsoft.Xbox.LiveTV_8wekyb3d8bbwe!Microsoft.Xbox.LiveTV.Application',
+          type: Characteristic.InputSourceType.TV
       },
       2: {
           name: 'Spotify',
-          uri: 'appx:SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App'
+          uri: 'SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App'
       },
       3: {
           name: 'Netflix',
-          uri: 'appx:4DF9E0F8.Netflix_mcm4njqhnhss8!App'
+          uri: '4DF9E0F8.Netflix_mcm4njqhnhss8!App'
       },
       4: {
           name: 'Youtube',
-          uri: 'appx:GoogleInc.YouTube_yfg5n0ztvskxp!App'
+          uri: 'GoogleInc.YouTube_yfg5n0ztvskxp!App'
       },
       5: {
           name: 'Airserver',
-          uri: 'appx:F3F176BD.53203526D8F6C_p8qzvses5c8me!App'
+          uri: 'F3F176BD.53203526D8F6C_p8qzvses5c8me!AirServer',
+          type: Characteristic.InputSourceType.AIRPLAY
+      },
+      6: {
+          name: 'Dashboard',
+          uri: 'Xbox.Dashboard_8wekyb3d8bbwe!Xbox.Dashboard.Application',
+          type: Characteristic.InputSourceType.HOME_SCREEN
+      },
+      7: {
+          name: 'App',
+          uri: '',
+          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
       }
   }
 
@@ -51,11 +68,17 @@ function SmartglassDevice(log, config) {
   device_service.getCharacteristic(Characteristic.ActiveIdentifier)
                 .on('set', function(newValue, callback) {
                     platform.log("Launching app: "+platform.apps[newValue].name);
-                    platform.restClient.launchApp(platform.liveid, platform.apps[newValue].uri, function(success){
-                        platform.log("App launched: "+platform.apps[newValue].name);
+                    if(platform.apps[newValue].uri != ''){
+                        platform.restClient.launchApp(platform.liveid, 'appx:'+platform.apps[newValue].uri, function(success){
+                            platform.log("App launched: "+platform.apps[newValue].name);
+                            platform.activeApp = newValue;
+                            callback(null);
+                        });
+                    } else {
                         callback(null);
-                    });
+                    }
                 });
+  this.device_service = device_service;
 
   this.log("Registering Information Service...");
   var info_service = new Service.AccessoryInformation();
@@ -91,10 +114,14 @@ function SmartglassDevice(log, config) {
     this.apps[identifier].service.setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED);
     this.apps[identifier].service.setCharacteristic(Characteristic.ConfiguredName, this.apps[identifier].name);
 
-    if(identifier == '1')
-        this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.TV);
+    if(this.apps[identifier].type != undefined)
+        this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, this.apps[identifier].type);
     else
         this.apps[identifier].service.setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.APP);
+
+    if(this.apps[identifier].type != undefined && this.apps[identifier].type == true){
+        this.apps[identifier].service.setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.HIDDEN);
+    }
 
     this.apps[identifier].service.setCharacteristic(Characteristic.Identifier, identifier);
 
@@ -110,7 +137,6 @@ SmartglassDevice.prototype.get_power_state = function(callback)
     platform.log("Getting Device Power State...");
 
     platform.restClient.getDevice(platform.liveid, function(device){
-        platform.log(device);
 
         if(device.success == false){
             platform.log("Device not found on xbox-smartglass-rest server");
@@ -122,6 +148,25 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 
         } else if(device.connection_state != undefined && device.connection_state == 'Connected'){
             platform.log("Device is on");
+            platform.restClient.getDeviceStatus(platform.liveid, function(status){
+                var currentId = 0;
+
+                for(var id in platform.apps){
+                    if(platform.apps[id].uri == status.active_titles[0].aum){
+                        currentId = id;
+                    }
+                }
+
+                if(currentId == 0){
+                    if(status.active_titles[0].aum.indexOf('.App') >= 0){
+                        currentId = 7;
+                    }
+                }
+
+                platform.log('Current Mode set to:', platform.apps[currentId].name || currentId);
+                platform.device_service.updateCharacteristic(Characteristic.ActiveIdentifier, currentId);
+            });
+
             callback(null, true);
         } else {
 
