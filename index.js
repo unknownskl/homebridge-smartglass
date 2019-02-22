@@ -260,12 +260,12 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
 
         if (state == 0)
         {
-            this.restClient.sendIr(this.liveid, 'tv/vol_up', function(success){
-                platform.log("Send ir command:", 'tv/vol_up');
+            this.restClient.sendIr(this.liveid, '0/btn.vol_up', function(success){
+                platform.log("Send ir command:", '0/btn.vol_up');
             });
         } else {
-            this.restClient.sendIr(this.liveid, 'tv/vol_down', function(success){
-                platform.log("Send ir command:", 'tv/vol_down');
+            this.restClient.sendIr(this.liveid, '0/btn.vol_down', function(success){
+                platform.log("Send ir command:", '0/btn.vol_down');
             });
         }
         callback();
