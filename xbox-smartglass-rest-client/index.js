@@ -53,6 +53,22 @@ module.exports = function(address, port)
             });
         },
 
+        getDeviceStatus: function(liveid, callback){
+            request(this._getServerAddress('device/'+liveid+'/console_status'), function (error, response, body) {
+                if(error){
+                    console.log('Console with the supplied liveid was not found by the xbox-smartglass-rest server');
+                    console.log('Error:', error);
+                    callback({
+                        success: false
+                    });
+                } else {
+                    var JsonObject = JSON.parse(body);
+
+                    callback(JsonObject.console_status || JsonObject)
+                }
+            });
+        },
+
         connect: function(liveid, callback){
             request(this._getServerAddress('device/'+liveid+'/connect'), function (error, response, body) {
                 if(error){
