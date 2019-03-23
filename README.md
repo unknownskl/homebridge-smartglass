@@ -32,7 +32,26 @@ Add the Accessory in your Homebridge config:
             "address": "127.0.0.1",
             "port": 5557,
             "liveid": "FD00000000000000",
-            "consoleip": "192.168.2.5"
+            "consoleip": "192.168.2.5",
+            "apps": [
+                {
+                    "name": "Spotify",
+                    "uri": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App"
+                },
+                {
+                    "name": "Youtube",
+                    "uri": "GoogleInc.YouTube_yfg5n0ztvskxp!App"
+                },
+                {
+                    "name": "Netflix",
+                    "uri": "4DF9E0F8.Netflix_mcm4njqhnhss8!App"
+                },
+                {
+                    "name": "Airserver",
+                    "uri": "F3F176BD.53203526D8F6C_p8qzvses5c8me!AirServer",
+                    "type": "Characteristic.InputSourceType.AIRPLAY"
+                }
+            ]
         }
     ],
 

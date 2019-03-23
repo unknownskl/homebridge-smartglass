@@ -18,45 +18,31 @@ function SmartglassDevice(log, config) {
   this.consoleip = config.consoleip;
   this.restClient = SmartglassRest(config.address, config.port);
 
-  this.apps = {
-      0: {
+  this.apps = [
+      {
           name: 'Game',
           uri: '',
-          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
+          type: Characteristic.InputSourceType.OTHER // Puts on hidden
       },
-      1: {
+      {
           name: 'TV',
           uri: 'Microsoft.Xbox.LiveTV_8wekyb3d8bbwe!Microsoft.Xbox.LiveTV.Application',
           type: Characteristic.InputSourceType.TV
       },
-      2: {
-          name: 'Spotify',
-          uri: 'SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App'
-      },
-      3: {
-          name: 'Netflix',
-          uri: '4DF9E0F8.Netflix_mcm4njqhnhss8!App'
-      },
-      4: {
-          name: 'Youtube',
-          uri: 'GoogleInc.YouTube_yfg5n0ztvskxp!App'
-      },
-      5: {
-          name: 'Airserver',
-          uri: 'F3F176BD.53203526D8F6C_p8qzvses5c8me!AirServer',
-          type: Characteristic.InputSourceType.AIRPLAY
-      },
-      6: {
+      {
           name: 'Dashboard',
           uri: 'Xbox.Dashboard_8wekyb3d8bbwe!Xbox.Dashboard.Application',
-          type: Characteristic.InputSourceType.HOME_SCREEN
+          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
       },
-      7: {
+      {
           name: 'App',
           uri: '',
-          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
+          type: Characteristic.InputSourceType.OTHER // Puts on hidden
       }
-  }
+  ]
+
+  if(config.apps != undefined)
+    this.apps = this.apps.concat(config.apps)
 
   var platform = this;
 
@@ -110,6 +96,7 @@ function SmartglassDevice(log, config) {
   this.log("Registering InputSource Service...");
 
   for(var identifier in this.apps){
+      this.log(identifier);
     this.apps[identifier].service = new Service.InputSource(this.apps[identifier].name, this.apps[identifier].name);
     this.apps[identifier].service.setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED);
     this.apps[identifier].service.setCharacteristic(Characteristic.ConfiguredName, this.apps[identifier].name);
@@ -151,19 +138,25 @@ SmartglassDevice.prototype.get_power_state = function(callback)
             platform.restClient.getDeviceStatus(platform.liveid, function(status){
                 var currentId = 0;
 
-                for(var id in platform.apps){
-                    if(platform.apps[id].uri == status.active_titles[0].aum){
-                        currentId = id;
+                if(status.active_titles[0]) {
+                    for(var id in platform.apps){
+                        if(platform.apps[id].uri == status.active_titles[0].aum){
+                            currentId = id;
+                        }
                     }
                 }
 
                 if(currentId == 0){
-                    if(status.active_titles[0].aum.indexOf('.App') >= 0){
-                        currentId = 7;
+                    if(status.active_titles[0].aum.indexOf('!App') >= 0){
+                        currentId = 3;
                     }
                 }
 
-                platform.log('Current Mode set to:', platform.apps[currentId].name || currentId);
+                platform.log('Current Mode set to:', platform.apps[currentId].name, currentId);
+                if(currentId == 0){
+                    platform.log('Detected unknown app:', status.active_titles[0].aum)
+                }
+
                 platform.device_service.updateCharacteristic(Characteristic.ActiveIdentifier, currentId);
             });
 
@@ -280,7 +273,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
                         key_type = 'media';
                         break;
                 case Characteristic.RemoteKey.INFORMATION:
-                        input_key = 'x';
+                        input_key = 'nexus';
                         key_type = 'input';
                         break;
         }
