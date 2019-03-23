@@ -22,7 +22,7 @@ function SmartglassDevice(log, config) {
       {
           name: 'Game',
           uri: '',
-          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
+          type: Characteristic.InputSourceType.OTHER // Puts on hidden
       },
       {
           name: 'TV',
@@ -37,7 +37,7 @@ function SmartglassDevice(log, config) {
       {
           name: 'App',
           uri: '',
-          type: Characteristic.InputSourceType.HOME_SCREEN // Puts on hidden
+          type: Characteristic.InputSourceType.OTHER // Puts on hidden
       }
   ]
 
@@ -273,7 +273,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
                         key_type = 'media';
                         break;
                 case Characteristic.RemoteKey.INFORMATION:
-                        input_key = 'x';
+                        input_key = 'nexus';
                         key_type = 'input';
                         break;
         }
