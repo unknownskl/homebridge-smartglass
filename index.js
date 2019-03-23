@@ -138,9 +138,11 @@ SmartglassDevice.prototype.get_power_state = function(callback)
             platform.restClient.getDeviceStatus(platform.liveid, function(status){
                 var currentId = 0;
 
-                for(var id in platform.apps){
-                    if(platform.apps[id].uri == status.active_titles[0].aum){
-                        currentId = id;
+                if(status.active_titles[0]) {
+                    for(var id in platform.apps){
+                        if(platform.apps[id].uri == status.active_titles[0].aum){
+                            currentId = id;
+                        }
                     }
                 }
 
