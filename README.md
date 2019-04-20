@@ -4,20 +4,9 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- xbox-smartglass-rest-python
-- xbox-smartglass-core-node
+- xbox-smartglass-core-node >= 0.3.3
 
 ### Easy way up?
-
-Using docker you can get the xbox-smartglass-rest-python server up in no-time. Use the following `docker-compose.yml` image to run the server in docker (Works on the Raspberry Pi).
-
-    version: '2'
-
-    services:
-      rest:
-        image: unknownskl/xbox-smartglass-rest-python
-        ports:
-        - 5557:5557
 
 Install the plugin:
 
@@ -29,8 +18,6 @@ Add the Accessory in your Homebridge config:
         {
             "accessory": "Smartglass",
             "name": "Xbox One",
-            "address": "127.0.0.1",
-            "port": 5557,
             "liveid": "FD00000000000000",
             "consoleip": "192.168.2.5",
             "apps": [
@@ -55,8 +42,11 @@ Add the Accessory in your Homebridge config:
         }
     ],
 
-`address` needs to contain the address to the xbox-smartglass-rest-python server. If the docker image runs remotely, you need to change the ip.
-
 `liveid` needs to contain your Xbox live id. You can get this live id in the console settings.
 
 `consoleip` needs to contain your xbox console ip. Best is to set a static ip on the console.
+
+### Known issues
+
+- Bug: Plugin can crash homebridge sometimes
+- Bug: Remote control will shutdown the xbox

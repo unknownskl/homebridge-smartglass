@@ -1,5 +1,4 @@
 var Service, Characteristic, HomebridgeAPI;
-var SmartglassRest = require('./xbox-smartglass-rest-client');
 var Smartglass = require('xbox-smartglass-core-node');
 var Package = require('./package.json');
 
@@ -17,7 +16,6 @@ function SmartglassDevice(log, config) {
     this.name = config.name;
     this.liveid = config.liveid;
     this.consoleip = config.consoleip;
-    this.restClient = SmartglassRest(config.address, config.port)
     this.sgClient = false
     this.connection_status = false
     this.active_app = ''
@@ -71,6 +69,7 @@ function SmartglassDevice(log, config) {
                 if(result === true){
                     console.log('Xbox succesfully connected!');
                     this.connection_status = true
+                    //device_service.setCharacteristic(Characteristic.Active, true)
                 } else {
                     console.log('Failed to connect to xbox:', result);
                 }
@@ -80,6 +79,23 @@ function SmartglassDevice(log, config) {
 
     setInterval(connect_client, 30000)
     connect_client()
+
+    this.sgClient._on_timeout.push(function(){
+        this.connection_status = false
+        //device_service.setCharacteristic(Characteristic.Active, false)
+
+        this.sgClient.connect({
+            ip: this.consoleip
+        }, function(result){
+            if(result === true){
+                console.log('Xbox succesfully connected!');
+                this.connection_status = true
+                //device_service.setCharacteristic(Characteristic.Active, true)
+            } else {
+                console.log('Failed to connect to xbox:', result);
+            }
+        }.bind(this));
+    }.bind(this))
 
     this.sgClient._on_console_status.push(function(response, device, smartglass){
         if(response.packet_decoded.protected_payload.apps[0] != undefined){
@@ -105,11 +121,12 @@ function SmartglassDevice(log, config) {
                 .on('set', function(newValue, callback) {
                     platform.log("Launching app: "+platform.apps[newValue].name);
                     if(platform.apps[newValue].uri != ''){
-                        platform.restClient.launchApp(platform.liveid, 'appx:'+platform.apps[newValue].uri, function(success){
-                            platform.log("App launched: "+platform.apps[newValue].name);
-                            platform.activeApp = newValue;
-                            callback(null);
-                        });
+                        // platform.restClient.launchApp(platform.liveid, 'appx:'+platform.apps[newValue].uri, function(success){
+                        //     platform.log("App launched: "+platform.apps[newValue].name);
+                        //     platform.activeApp = newValue;
+                        //     callback(null);
+                        // });
+                        callback(null);
                     } else {
                         callback(null);
                     }
@@ -209,6 +226,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
         platform.log("Setting key state...");
         var input_key;
         var key_type;
+        
         switch (state)
         {
                 case Characteristic.RemoteKey.ARROW_UP:
@@ -249,17 +267,19 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
                         break;
         }
 
-        if(key_type == 'input'){
-            this.restClient.sendInput(this.liveid, input_key, function(success){
-                platform.log("Send input key:", input_key);
-                callback();
-            });
-        } else {
-            this.restClient.sendMedia(this.liveid, input_key, function(success){
-                platform.log("Send media key:", input_key);
-                callback();
-            });
-        }
+        // if(key_type == 'input'){
+        //     this.restClient.sendInput(this.liveid, input_key, function(success){
+        //         platform.log("Send input key:", input_key);
+        //         callback();
+        //     });
+        // } else {
+        //     this.restClient.sendMedia(this.liveid, input_key, function(success){
+        //         platform.log("Send media key:", input_key);
+        //         callback();
+        //     });
+        // }
+
+         callback();
 }
 
 SmartglassDevice.prototype.set_volume_state = function(state, callback)
@@ -267,16 +287,16 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
         var platform = this;
         platform.log("Setting Volume State...");
 
-        if (state == 0)
-        {
-            this.restClient.sendIr(this.liveid, '0/btn.vol_up', function(success){
-                platform.log("Send ir command:", '0/btn.vol_up');
-            });
-        } else {
-            this.restClient.sendIr(this.liveid, '0/btn.vol_down', function(success){
-                platform.log("Send ir command:", '0/btn.vol_down');
-            });
-        }
+        // if (state == 0)
+        // {
+        //     this.restClient.sendIr(this.liveid, '0/btn.vol_up', function(success){
+        //         platform.log("Send ir command:", '0/btn.vol_up');
+        //     });
+        // } else {
+        //     this.restClient.sendIr(this.liveid, '0/btn.vol_down', function(success){
+        //         platform.log("Send ir command:", '0/btn.vol_down');
+        //     });
+        // }
         callback();
 }
 
