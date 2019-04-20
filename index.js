@@ -123,10 +123,9 @@ function SmartglassDevice(log, config) {
                     if(platform.apps[newValue].uri != ''){
                         // platform.restClient.launchApp(platform.liveid, 'appx:'+platform.apps[newValue].uri, function(success){
                         //     platform.log("App launched: "+platform.apps[newValue].name);
-                        //     platform.activeApp = newValue;
-                        //     callback(null);
+                            platform.activeApp = newValue;
+                            callback(null);
                         // });
-                        callback(null);
                     } else {
                         callback(null);
                     }
@@ -226,7 +225,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
         platform.log("Setting key state...");
         var input_key;
         var key_type;
-        
+
         switch (state)
         {
                 case Characteristic.RemoteKey.ARROW_UP:
