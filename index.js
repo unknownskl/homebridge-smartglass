@@ -62,16 +62,40 @@ function SmartglassDevice(log, config) {
     this.sgClient = Smartglass()
 
     var connect_client = function(){
-        if(this.connection_status == false){
+
+        if(this.sgClient._connection_status == false){
+            this.sgClient = Smartglass()
             this.sgClient.connect({
                 ip: this.consoleip
             }, function(result){
                 if(result === true){
                     console.log('Xbox succesfully connected!');
-                    this.connection_status = true
+                    platform.connection_status = true
                     //device_service.setCharacteristic(Characteristic.Active, true)
                 } else {
                     console.log('Failed to connect to xbox:', result);
+                    platform.connection_status = false
+                }
+            }.bind(this));
+
+            this.sgClient.on('_on_timeout', function(connect_client){
+                platform.connection_status = false
+                //device_service.setCharacteristic(Characteristic.Active, false)
+
+                //connect_client()
+            }.bind(this, connect_client))
+
+            this.sgClient.on('_on_console_status', function(response, device, smartglass){
+                if(response.packet_decoded.protected_payload.apps[0] != undefined){
+                    if(this.active_app != response.packet_decoded.protected_payload.apps[0].aum_id){
+                        this.active_app = response.packet_decoded.protected_payload.apps[0].aum_id
+                        console.log('Current active app:', this.active_app)
+
+                        var activeId = this.getAppId(this.active_app)
+                        console.log(activeId)
+
+                        this.device_service.setCharacteristic(Characteristic.ActiveIdentifier, activeId);
+                    }
                 }
             }.bind(this));
         }
@@ -79,37 +103,6 @@ function SmartglassDevice(log, config) {
 
     setInterval(connect_client, 30000)
     connect_client()
-
-    this.sgClient._on_timeout.push(function(){
-        this.connection_status = false
-        //device_service.setCharacteristic(Characteristic.Active, false)
-
-        this.sgClient.connect({
-            ip: this.consoleip
-        }, function(result){
-            if(result === true){
-                console.log('Xbox succesfully connected!');
-                this.connection_status = true
-                //device_service.setCharacteristic(Characteristic.Active, true)
-            } else {
-                console.log('Failed to connect to xbox:', result);
-            }
-        }.bind(this));
-    }.bind(this))
-
-    this.sgClient._on_console_status.push(function(response, device, smartglass){
-        if(response.packet_decoded.protected_payload.apps[0] != undefined){
-            if(this.active_app != response.packet_decoded.protected_payload.apps[0].aum_id){
-                this.active_app = response.packet_decoded.protected_payload.apps[0].aum_id
-                console.log('Current active app:', this.active_app)
-
-                var activeId = this.getAppId(this.active_app)
-                console.log(activeId)
-
-                this.device_service.setCharacteristic(Characteristic.ActiveIdentifier, activeId);
-            }
-        }
-    }.bind(this));
     // End Start Smartglass Client
 
     this.log("Registering Television Service...");
@@ -186,9 +179,7 @@ function SmartglassDevice(log, config) {
 
 SmartglassDevice.prototype.get_power_state = function(callback)
 {
-    var platform = this;
-
-    if(platform.connection_status == false){
+    if(this.sgClient._connection_status == false){
         callback(null, false);
     } else {
         callback(null, true);
@@ -197,22 +188,21 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 
 SmartglassDevice.prototype.set_power_state = function(state, callback)
 {
-    var platform = this;
-
-    platform.log("Setting Device Power State...");
-    if(platform.connection_status == false){
+    this.log("Setting Device Power State...");
+    var smartglass = Smartglass()
+    if(this.sgClient._connection_status == false){
         // Power on
-        platform.sgClient.powerOn({
-            live_id: platform.liveid, // Put your console's live id here (Required)
+        smartglass.powerOn({
+            live_id: this.liveid, // Put your console's live id here (Required)
             tries: 4, // Number of packets too issue the boot command (Optional)
-            ip: platform.consoleip // Your consoles ip address (Optional)
+            ip: this.consoleip // Your consoles ip address (Optional)
         }, function(result){
             callback();
         });
     } else {
         // Power Off
-        platform.sgClient.powerOff({
-            ip: platform.consoleip // Your consoles ip address (Optional)
+        smartglass.powerOff({
+            ip: this.consoleip // Your consoles ip address (Optional)
         }, function(result){
             callback();
         });
