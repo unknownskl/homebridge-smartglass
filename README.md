@@ -4,13 +4,14 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- xbox-smartglass-core-node >= 0.3.3
+- xbox-smartglass-core-node >= 0.4.0
 
 ### Easy way up?
 
 Install the plugin:
 
     npm install -g homebridge-smartglass
+
 
 Add the Accessory in your Homebridge config:
 
