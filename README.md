@@ -4,7 +4,9 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- xbox-smartglass-core-node >= 0.4.0
+- xbox-smartglass-core-node >= 0.4.1
+- Python 2
+- pip install cryptography
 
 ### Easy way up?
 
@@ -49,5 +51,5 @@ Add the Accessory in your Homebridge config:
 
 ### Known issues
 
-- Bug: Plugin can crash homebridge sometimes
-- Bug: Remote control will shutdown the xbox
+- Bug: Plugin can crash homebridge sometimes, it is still in beta!
+- Only one Xbox per homebridge instance is possible
