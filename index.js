@@ -1,6 +1,7 @@
 var Service, Characteristic, HomebridgeAPI;
 var Smartglass = require('xbox-smartglass-core-node');
 var Package = require('./package.json');
+var SystemInputChannel = require('xbox-smartglass-core-node/src/channels/systeminput');
 
 module.exports = function(homebridge) {
 
@@ -65,6 +66,7 @@ function SmartglassDevice(log, config) {
 
         if(this.sgClient._connection_status == false){
             this.sgClient = Smartglass()
+            this.sgClient.addManager('system_input', SystemInputChannel())
             this.sgClient.connect({
                 ip: this.consoleip
             }, function(result){
@@ -189,8 +191,10 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 SmartglassDevice.prototype.set_power_state = function(state, callback)
 {
     this.log("Setting Device Power State...");
+    this.log(state)
     var smartglass = Smartglass()
     if(this.sgClient._connection_status == false){
+    //if(state == false){
         // Power on
         smartglass.powerOn({
             live_id: this.liveid, // Put your console's live id here (Required)
@@ -200,12 +204,15 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
             callback();
         });
     } else {
-        // Power Off
-        smartglass.powerOff({
-            ip: this.consoleip // Your consoles ip address (Optional)
-        }, function(result){
-            callback();
-        });
+        if(state != 1){
+            // Power Off
+            smartglass.powerOff({
+                ip: this.consoleip // Your consoles ip address (Optional)
+            }, function(result){
+                this.sgClient._connection_status = false
+            }.bind(this));
+        }
+        callback();
     }
 }
 
@@ -219,19 +226,19 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
         switch (state)
         {
                 case Characteristic.RemoteKey.ARROW_UP:
-                        input_key = 'dpad_up';
+                        input_key = 'up';
                         key_type = 'input';
                         break;
                 case Characteristic.RemoteKey.ARROW_DOWN:
-                        input_key = 'dpad_down';
+                        input_key = 'down';
                         key_type = 'input';
                         break;
                 case Characteristic.RemoteKey.ARROW_LEFT:
-                        input_key = 'dpad_left';
+                        input_key = 'left';
                         key_type = 'input';
                         break;
                 case Characteristic.RemoteKey.ARROW_RIGHT:
-                        input_key = 'dpad_right';
+                        input_key = 'right';
                         key_type = 'input';
                         break;
                 case Characteristic.RemoteKey.SELECT:
@@ -256,19 +263,14 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
                         break;
         }
 
-        // if(key_type == 'input'){
-        //     this.restClient.sendInput(this.liveid, input_key, function(success){
-        //         platform.log("Send input key:", input_key);
-        //         callback();
-        //     });
-        // } else {
-        //     this.restClient.sendMedia(this.liveid, input_key, function(success){
-        //         platform.log("Send media key:", input_key);
-        //         callback();
-        //     });
-        // }
-
-         callback();
+        if(key_type == 'input'){
+            platform.sgClient.getManager('system_input').sendCommand(input_key)
+            platform.log("Send input key:", input_key);
+            callback();
+        } else {
+            platform.log("Send media key:", input_key);
+            callback();
+        }
 }
 
 SmartglassDevice.prototype.set_volume_state = function(state, callback)
