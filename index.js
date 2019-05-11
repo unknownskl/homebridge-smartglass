@@ -191,6 +191,7 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
     this.log("Setting Device Power State...");
     var smartglass = Smartglass()
     if(this.sgClient._connection_status == false){
+    //if(state == false){
         // Power on
         smartglass.powerOn({
             live_id: this.liveid, // Put your console's live id here (Required)
@@ -204,8 +205,9 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
         smartglass.powerOff({
             ip: this.consoleip // Your consoles ip address (Optional)
         }, function(result){
+            this.sgClient._connection_status = false
             callback();
-        });
+        }.bind(this));
     }
 }
 
