@@ -67,4 +67,4 @@ Add the Accessory in your Homebridge config:
 ### Known issues
 
 - Bug: Plugin can crash homebridge sometimes, it is still in beta!
-- Only one Xbox per homebridge instance is possible
+- Only one Xbox per homebridge instance is tested.
