@@ -2,6 +2,7 @@ var Service, Characteristic, HomebridgeAPI;
 var Smartglass = require('xbox-smartglass-core-node');
 var Package = require('./package.json');
 var SystemInputChannel = require('xbox-smartglass-core-node/src/channels/systeminput');
+var SystemMediaChannel = require('xbox-smartglass-core-node/src/channels/systemmedia');
 
 module.exports = function(homebridge) {
 
@@ -66,7 +67,8 @@ function SmartglassDevice(log, config) {
 
         if(this.sgClient._connection_status == false){
             this.sgClient = Smartglass()
-            this.sgClient.addManager('system_input', SystemInputChannel())
+            this.sgClient.addManager('system_input', SystemInputChannel(0))
+            this.sgClient.addManager('system_media', SystemMediaChannel(1))
             this.sgClient.connect({
                 ip: this.consoleip
             }, function(result){
@@ -83,8 +85,6 @@ function SmartglassDevice(log, config) {
             this.sgClient.on('_on_timeout', function(connect_client){
                 platform.connection_status = false
                 //device_service.setCharacteristic(Characteristic.Active, false)
-
-                //connect_client()
             }.bind(this, connect_client))
 
             this.sgClient.on('_on_console_status', function(response, device, smartglass){
@@ -254,7 +254,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
                         key_type = 'input';
                         break;
                 case Characteristic.RemoteKey.PLAY_PAUSE:
-                        input_key = 'play_pause';
+                        input_key = 'playpause';
                         key_type = 'media';
                         break;
                 case Characteristic.RemoteKey.INFORMATION:
@@ -268,6 +268,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
             platform.log("Send input key:", input_key);
             callback();
         } else {
+            platform.sgClient.getManager('system_media').sendCommand(input_key)
             platform.log("Send media key:", input_key);
             callback();
         }

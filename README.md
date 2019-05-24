@@ -8,12 +8,24 @@ Requirements:
 - Python 2
 - pip install cryptography
 
-### Easy way up?
+### How to install
 
 Install the plugin:
 
     npm install -g homebridge-smartglass
 
+### HOOBS instructions
+
+1. Search for the plugin using `smartglass`
+
+2. Go to startup settings (Docker icon -> Startup Script) and add the 2 lines below
+
+    apk add --no-cache python2 python2-dev py2-pip gcc
+    pip install cryptography
+
+3. Restart the HOOBS container (Docker icon -> Restart Container). This can take a couple minutes to come back. It will install all the required dependencies. (Up to 10 minutes, this is a one-time thing)
+
+### Homebridge configuration
 
 Add the Accessory in your Homebridge config:
 
@@ -45,11 +57,14 @@ Add the Accessory in your Homebridge config:
         }
     ],
 
-`liveid` needs to contain your Xbox live id. You can get this live id in the console settings.
+| Key | Explanation |
+|-----|-------------|
+| `liveid` | This needs to contain your Xbox live id. You can get this live id in the console settings. |
+| `consoleip` | This needs to contain your xbox console ip. Best is to set a static ip on the console. |
+| `apps` | This part is optional. You can define extra apps here to show them in Homekit |
 
-`consoleip` needs to contain your xbox console ip. Best is to set a static ip on the console.
 
 ### Known issues
 
 - Bug: Plugin can crash homebridge sometimes, it is still in beta!
-- Only one Xbox per homebridge instance is possible
+- Only one Xbox per homebridge instance is tested.
