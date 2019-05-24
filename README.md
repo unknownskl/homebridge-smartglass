@@ -4,7 +4,7 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- xbox-smartglass-core-node >= 0.4.1
+- xbox-smartglass-core-node >= 0.4.2
 - Python 2
 - pip install cryptography
 
@@ -21,6 +21,7 @@ Install the plugin:
 2. Go to startup settings (Docker icon -> Startup Script) and add the 2 lines below
 
     apk add --no-cache python2 python2-dev py2-pip gcc
+    
     pip install cryptography
 
 3. Restart the HOOBS container (Docker icon -> Restart Container). This can take a couple minutes to come back. It will install all the required dependencies. (Up to 10 minutes, this is a one-time thing)
