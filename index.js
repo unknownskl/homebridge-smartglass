@@ -3,6 +3,7 @@ var Smartglass = require('xbox-smartglass-core-node');
 var Package = require('./package.json');
 var SystemInputChannel = require('xbox-smartglass-core-node/src/channels/systeminput');
 var SystemMediaChannel = require('xbox-smartglass-core-node/src/channels/systemmedia');
+var TvRemoteChannel = require('xbox-smartglass-core-node/src/channels/tvremote');
 
 module.exports = function(homebridge) {
 
@@ -69,6 +70,8 @@ function SmartglassDevice(log, config) {
             this.sgClient = Smartglass()
             this.sgClient.addManager('system_input', SystemInputChannel(0))
             this.sgClient.addManager('system_media', SystemMediaChannel(1))
+            this.sgClient.addManager('tv_remote', TvRemoteChannel(2))
+
             this.sgClient.connect({
                 ip: this.consoleip
             }, function(result){
@@ -279,16 +282,14 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
         var platform = this;
         platform.log("Setting Volume State...");
 
-        // if (state == 0)
-        // {
-        //     this.restClient.sendIr(this.liveid, '0/btn.vol_up', function(success){
-        //         platform.log("Send ir command:", '0/btn.vol_up');
-        //     });
-        // } else {
-        //     this.restClient.sendIr(this.liveid, '0/btn.vol_down', function(success){
-        //         platform.log("Send ir command:", '0/btn.vol_down');
-        //     });
-        // }
+        if (state == 0){
+            platform.log("Send ir command:", '0/btn.vol_up');
+            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_up')
+        } else {
+            platform.log("Send ir command:", '0/btn.vol_down');
+            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_down')
+        }
+
         callback();
 }
 
