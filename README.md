@@ -1,4 +1,6 @@
 # Homebridge-Smartglass
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_shield)
+
 
 This module is an Accessory plugin for Homebridge which allows you to control your Xbox using Homekit and the new Remote control introduced in iOS 12.2.
 Currently still in beta.
@@ -69,3 +71,7 @@ Add the Accessory in your Homebridge config:
 
 - Bug: Plugin can crash homebridge sometimes, it is still in beta!
 - Only one Xbox per homebridge instance is tested.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_large)
