@@ -68,13 +68,11 @@ function SmartglassDevice(log, config) {
 
         if(this.sgClient._connection_status == false){
             this.sgClient = Smartglass()
-            this.sgClient.addManager('system_input', SystemInputChannel(0))
-            this.sgClient.addManager('system_media', SystemMediaChannel(1))
-            this.sgClient.addManager('tv_remote', TvRemoteChannel(2))
+            this.sgClient.addManager('system_input', SystemInputChannel())
+            this.sgClient.addManager('system_media', SystemMediaChannel())
+            this.sgClient.addManager('tv_remote', TvRemoteChannel())
 
-            this.sgClient.connect({
-                ip: this.consoleip
-            }, function(result){
+            this.sgClient.connect(this.consoleip, function(result){
                 if(result === true){
                     console.log('Xbox succesfully connected!');
                     platform.connection_status = true
@@ -91,13 +89,12 @@ function SmartglassDevice(log, config) {
             }.bind(this, connect_client))
 
             this.sgClient.on('_on_console_status', function(response, device, smartglass){
+                // @TODO: Rewrite this part so it uses the Smartglass class
                 if(response.packet_decoded.protected_payload.apps[0] != undefined){
                     if(this.active_app != response.packet_decoded.protected_payload.apps[0].aum_id){
                         this.active_app = response.packet_decoded.protected_payload.apps[0].aum_id
-                        console.log('Current active app:', this.active_app)
 
                         var activeId = this.getAppId(this.active_app)
-                        console.log(activeId)
 
                         this.device_service.setCharacteristic(Characteristic.ActiveIdentifier, activeId);
                     }
@@ -106,7 +103,7 @@ function SmartglassDevice(log, config) {
         }
     }.bind(this)
 
-    setInterval(connect_client, 30000)
+    setInterval(connect_client, 15000)
     connect_client()
     // End Start Smartglass Client
 
@@ -209,9 +206,7 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
     } else {
         if(state != 1){
             // Power Off
-            smartglass.powerOff({
-                ip: this.consoleip // Your consoles ip address (Optional)
-            }, function(result){
+            this.sgClient.powerOff(function(result){
                 this.sgClient._connection_status = false
             }.bind(this));
         }
