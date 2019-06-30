@@ -4,7 +4,7 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- NodeJS <= 11
+- NodeJS >= 10.x
 
 ### How to install
 

@@ -1,12 +1,12 @@
 var Service, Characteristic, HomebridgeAPI;
 var Smartglass = require('xbox-smartglass-core-node');
-var Package = require('./package.json');
 var SystemInputChannel = require('xbox-smartglass-core-node/src/channels/systeminput');
 var SystemMediaChannel = require('xbox-smartglass-core-node/src/channels/systemmedia');
 var TvRemoteChannel = require('xbox-smartglass-core-node/src/channels/tvremote');
 
-module.exports = function(homebridge) {
+var Package = require('./package.json');
 
+module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   HomebridgeAPI = homebridge;
@@ -14,7 +14,6 @@ module.exports = function(homebridge) {
 }
 
 function SmartglassDevice(log, config) {
-    console.log('SmartglassDevice')
     this.log = log;
     this.name = config.name;
     this.liveid = config.liveid;
@@ -68,20 +67,19 @@ function SmartglassDevice(log, config) {
 
         if(this.sgClient._connection_status == false){
             this.sgClient = Smartglass()
-            this.sgClient.addManager('system_input', SystemInputChannel())
-            this.sgClient.addManager('system_media', SystemMediaChannel())
-            this.sgClient.addManager('tv_remote', TvRemoteChannel())
 
-            this.sgClient.connect(this.consoleip, function(result){
-                if(result === true){
+            this.sgClient.connect(this.consoleip).then(function(){
                     console.log('Xbox succesfully connected!');
                     platform.connection_status = true
+
+                    this.sgClient.addManager('system_input', SystemInputChannel())
+                    this.sgClient.addManager('system_media', SystemMediaChannel())
+                    this.sgClient.addManager('tv_remote', TvRemoteChannel())
                     //device_service.setCharacteristic(Characteristic.Active, true)
-                } else {
-                    console.log('Failed to connect to xbox:', result);
-                    platform.connection_status = false
-                }
-            }.bind(this));
+            }.bind(this), function(error){
+                console.log('Failed to connect to xbox:', error);
+                platform.connection_status = false
+            });
 
             this.sgClient.on('_on_timeout', function(connect_client){
                 platform.connection_status = false
@@ -194,23 +192,32 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
     this.log(state)
     var smartglass = Smartglass()
     if(this.sgClient._connection_status == false){
-    //if(state == false){
         // Power on
         smartglass.powerOn({
             live_id: this.liveid, // Put your console's live id here (Required)
-            tries: 4, // Number of packets too issue the boot command (Optional)
+            tries: 10, // Number of packets too issue the boot command (Optional)
             ip: this.consoleip // Your consoles ip address (Optional)
-        }, function(result){
-            callback();
+        }).then(function(){
+            callback(null, true);
+
+        }, function(error){
+            // Failed
+            console.log(error)
+            callback(error);
         });
     } else {
         if(state != 1){
             // Power Off
-            this.sgClient.powerOff(function(result){
+            this.sgClient.powerOff().then(function(result){
                 this.sgClient._connection_status = false
-            }.bind(this));
+                callback(null, true);
+
+            }.bind(this), function(error){
+                // Failed to turn off console
+                console.log(error)
+                callback(error);
+            });
         }
-        callback();
     }
 }
 
@@ -262,13 +269,22 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
         }
 
         if(key_type == 'input'){
-            platform.sgClient.getManager('system_input').sendCommand(input_key)
-            platform.log("Send input key:", input_key);
-            callback();
+            platform.sgClient.getManager('system_input').sendCommand(input_key).then(function(response){
+                platform.log("Send input key:", input_key);
+                callback();
+            }, function(error){
+                console.log(error)
+                callback();
+            })
+
         } else {
-            platform.sgClient.getManager('system_media').sendCommand(input_key)
-            platform.log("Send media key:", input_key);
-            callback();
+            platform.sgClient.getManager('system_media').sendCommand(input_key).then(function(response){
+                platform.log("Send media key:", input_key);
+                callback();
+            }, function(error){
+                console.log(error)
+                callback();
+            })
         }
 }
 
@@ -279,13 +295,21 @@ SmartglassDevice.prototype.set_volume_state = function(state, callback)
 
         if (state == 0){
             platform.log("Send ir command:", '0/btn.vol_up');
-            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_up')
+            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_up').then(function(){
+                platform.log("Send volume up: btn.vol_up");
+                callback();
+            }, function(error){
+                console.log(error)
+            })
         } else {
             platform.log("Send ir command:", '0/btn.vol_down');
-            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_down')
+            platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_down').then(function(){
+                platform.log("Send volume up: btn.vol_down");
+                callback();
+            }, function(error){
+                console.log(error)
+            })
         }
-
-        callback();
 }
 
 SmartglassDevice.prototype.getServices = function() {
