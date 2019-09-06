@@ -93,6 +93,7 @@ function SmartglassDevice(log, config) {
                         this.active_app = response.packet_decoded.protected_payload.apps[0].aum_id
 
                         var activeId = this.getAppId(this.active_app)
+                        platform.log('[Smartglass] Xbox switched to app: '+response.packet_decoded.protected_payload.apps[0].aum_id)
 
                         this.device_service.setCharacteristic(Characteristic.ActiveIdentifier, activeId);
                     }
@@ -155,7 +156,7 @@ function SmartglassDevice(log, config) {
     this.log("Registering InputSource Service...");
 
     for(var identifier in this.apps){
-        this.log(identifier);
+        // this.log(identifier);
         this.apps[identifier].service = new Service.InputSource(this.apps[identifier].name, this.apps[identifier].name);
         this.apps[identifier].service.setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED);
         this.apps[identifier].service.setCharacteristic(Characteristic.ConfiguredName, this.apps[identifier].name);
@@ -188,8 +189,10 @@ SmartglassDevice.prototype.get_power_state = function(callback)
 
 SmartglassDevice.prototype.set_power_state = function(state, callback)
 {
-    this.log("Setting Device Power State...");
-    this.log(state)
+    // this.log("Setting Device Power State...");
+    // this.log(state)
+    // this.log(this.sgClient._connection_status)
+
     var smartglass = Smartglass()
     if(this.sgClient._connection_status == false){
         // Power on
@@ -217,6 +220,8 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
                 console.log(error)
                 callback(error);
             });
+        } else {
+            callback(null, true);
         }
     }
 }
@@ -224,7 +229,7 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
 SmartglassDevice.prototype.set_key_state = function(state, callback)
 {
         var platform = this;
-        platform.log("Setting key state...");
+        // platform.log("Setting key state...");
         var input_key;
         var key_type;
 
@@ -270,7 +275,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 
         if(key_type == 'input'){
             platform.sgClient.getManager('system_input').sendCommand(input_key).then(function(response){
-                platform.log("Send input key:", input_key);
+                // platform.log("Send input key:", input_key);
                 callback();
             }, function(error){
                 console.log(error)
@@ -279,7 +284,7 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 
         } else {
             platform.sgClient.getManager('system_media').sendCommand(input_key).then(function(response){
-                platform.log("Send media key:", input_key);
+                // platform.log("Send media key:", input_key);
                 callback();
             }, function(error){
                 console.log(error)
@@ -291,20 +296,20 @@ SmartglassDevice.prototype.set_key_state = function(state, callback)
 SmartglassDevice.prototype.set_volume_state = function(state, callback)
 {
         var platform = this;
-        platform.log("Setting Volume State...");
+        // platform.log("Setting Volume State...");
 
         if (state == 0){
-            platform.log("Send ir command:", '0/btn.vol_up');
+            // platform.log("Send ir command:", '0/btn.vol_up');
             platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_up').then(function(){
-                platform.log("Send volume up: btn.vol_up");
+                // platform.log("Send volume up: btn.vol_up");
                 callback();
             }, function(error){
                 console.log(error)
             })
         } else {
-            platform.log("Send ir command:", '0/btn.vol_down');
+            // platform.log('Send ir command:', '0/btn.vol_down');
             platform.sgClient.getManager('tv_remote').sendIrCommand('btn.vol_down').then(function(){
-                platform.log("Send volume up: btn.vol_down");
+                // platform.log('Send volume up: btn.vol_down');
                 callback();
             }, function(error){
                 console.log(error)

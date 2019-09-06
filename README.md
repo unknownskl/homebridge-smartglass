@@ -17,6 +17,10 @@ Install the plugin:
 1. Search for the plugin using `smartglass`
 2. Install plugin and configure
 
+## Setting up the Xbox
+
+The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
+
 ### Homebridge configuration
 
 Add the Accessory in your Homebridge config:
