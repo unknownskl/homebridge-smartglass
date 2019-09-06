@@ -1,6 +1,6 @@
 {
   "name": "homebridge-smartglass",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Smartglass plugin for homebridge. Allows you to control your Xbox using Homekit",
   "license": "ISC",
   "keywords": [

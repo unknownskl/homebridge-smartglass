@@ -24,6 +24,23 @@
                 "title": "IP Adress",
                 "type": "string",
                 "required": true
+            },
+            "apps": {
+                "type": "array",
+                "items": {
+                    "title": "Combine",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "title": "Name",
+                            "type": "string"
+                        },
+                        "uri": {
+                            "title": "App URI",
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     }]
