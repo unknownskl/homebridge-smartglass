@@ -1,0 +1,30 @@
+{
+    "plugin_alias": "Smartglass",
+    "schemas": [{
+        "title": "Xbox One",
+        "type": "object",
+        "properties": {
+            "accessory": {
+                "title": "Accessory",
+                "type": "string",
+                "const": "Smartglass",
+                "readOnly": true
+            },
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "required": true
+            },
+            "liveid": {
+                "title": "Console ID",
+                "type": "string",
+                "required": true
+            },
+            "consoleip": {
+                "title": "IP Adress",
+                "type": "string",
+                "required": true
+            }
+        }
+    }]
+}
