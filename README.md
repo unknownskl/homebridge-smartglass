@@ -4,7 +4,7 @@ This module is an Accessory plugin for Homebridge which allows you to control yo
 Currently still in beta.
 
 Requirements:
-- NodeJS <= 11
+- NodeJS >= 10.x
 
 ### How to install
 
@@ -16,6 +16,10 @@ Install the plugin:
 
 1. Search for the plugin using `smartglass`
 2. Install plugin and configure
+
+## Setting up the Xbox
+
+The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
 
 ### Homebridge configuration
 
