@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "request": "^2.88.0",
-    "xbox-smartglass-core-node": "^0.6.0"
+    "xbox-smartglass-core-node": "^0.6.2"
   }
 }
