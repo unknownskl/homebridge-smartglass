@@ -46,13 +46,31 @@ function SmartglassDevice(log, config) {
     ]
 
     this.getAppId = function(aum_id){
+        // Match on App URI
         for(var app in this.apps){
             if(aum_id == this.apps[app].uri){
+                this.log('getAppId() - Match app on config list')
                 return app
             }
         }
 
-        return 1
+        // Match on regex
+        var regex = /!(.*)(Application|App|Airserver)/gm;
+
+        for(var app in this.apps){
+            var match = this.apps[app].uri.match(regex);
+            this.log(match)
+
+            if(match != null){
+                // Return app
+                this.log('getAppId() - Match app on as Application')
+                return 3;
+            }
+        }
+
+        // Return first entry in array (Game)
+        this.log('getAppId() - Match app as game as no app was defined')
+        return 0
     }
 
     if(config.apps != undefined)
