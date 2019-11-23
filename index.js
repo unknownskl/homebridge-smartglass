@@ -95,7 +95,11 @@ function SmartglassDevice(log, config) {
                     this.sgClient.addManager('tv_remote', TvRemoteChannel())
                     //device_service.setCharacteristic(Characteristic.Active, true)
             }.bind(this), function(error){
-                console.log('Failed to connect to xbox:', error);
+
+                if(error != false){
+                    console.log('Failed to connect to xbox:', error);
+                }
+
                 platform.connection_status = false
             });
 
