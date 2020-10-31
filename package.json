@@ -1,9 +1,16 @@
 {
   "name": "homebridge-smartglass",
-  "version": "0.13.5",
+  "version": "0.15.0",
   "description": "Smartglass plugin for homebridge. Allows you to control your Xbox using Homekit",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "homepage": "http://github.com/unknownskl/homebridge-smartglass",
   "keywords": [
     "homebridge-plugin",
@@ -19,9 +26,15 @@
   },
   "engines": {
     "node": ">=0.10.0",
-    "homebridge": ">=0.4.0"
+    "homebridge": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "10.17.19",
+    "typescript": "^3.8.3",
+    "rimraf": "^3.0.2",
+    "homebridge": "^1.0.4"
   },
   "dependencies": {
-    "xbox-smartglass-core-node": "^0.6.3"
+    "xbox-webapi": "^1.0.0"
   }
 }
