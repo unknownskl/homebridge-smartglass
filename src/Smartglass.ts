@@ -14,7 +14,9 @@ import {
 } from "homebridge";
 
 const XboxApiClient = require("xbox-webapi")
+const Smartglass = require("xbox-smartglass-core-node")
 const Package = require("../package.json")
+var pem = require('pem')
 
 const PLUGIN_NAME = "homebridge-smartglass";
 const PLATFORM_NAME = "Smartglass";
@@ -88,19 +90,23 @@ class SmartglassPlatform implements DynamicPlatformPlugin {
           log.info('User is authenticated.')
           this.xboxDiscovery()
       
-      }).catch(() => {
+      }).catch((error: any) => {
           // User is not authenticated
-          log.info('User is not authenticated. Starting flow...')
+          log.info('User is not authenticated. Starting flow...', error)
           
           var url = this.apiClient.startAuthServer(() => {
+
+            this.apiClient.isAuthenticated().then(() => {
+              log.info('Authentication is done. User logged in')
+              this.xboxDiscovery()
+
+            }).catch((error: any) => {
+              log.info(error)
+            })
             
-            log.info('Authentication is done. User logged in')
-            this.xboxDiscovery()
           })
           log.info('Open the following link to authenticate:', url)
       })
-
-
 
       // // The idea of this plugin is that we open a http service which exposes api calls to add or remove accessories
       // this.createHttpService();
@@ -129,7 +135,7 @@ class SmartglassPlatform implements DynamicPlatformPlugin {
 
   // --------------------------- CUSTOM METHODS ---------------------------
 
-  addAccessory(name: string, liveid: string, consoletype:  string) {
+  addAccessory(name: string, liveid: string, consoletype: string) {
     // uuid must be generated from a unique but not changing data source, name should not be used in the most cases. But works in this specific example.
     const uuid = hap.uuid.generate('homebridge:smartglass'+liveid);
 
@@ -142,9 +148,128 @@ class SmartglassPlatform implements DynamicPlatformPlugin {
       var televisionService: any = accessory.addService(hap.Service.Television)
         .setCharacteristic(hap.Characteristic.ConfiguredName, name)
         .setCharacteristic(hap.Characteristic.SleepDiscoveryMode, hap.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE)
-        .setCharacteristic(hap.Characteristic.ActiveIdentifier, 1)
+        .setCharacteristic(hap.Characteristic.ActiveIdentifier, 2)
         .setCharacteristic(hap.Characteristic.Active, 1)
-        .getCharacteristic(hap.Characteristic.RemoteKey).on('set', (newValue: any, callback: any) => {
+
+      televisionService.getCharacteristic(hap.Characteristic.CurrentMediaState)
+        .on('get', (callback: Function) => {
+          this.log.debug('Triggered GET CurrentMediaState');
+
+          // set this to a valid value for CurrentMediaState
+          const currentValue = 0;
+      
+          callback(null, currentValue);
+        })
+
+      televisionService.getCharacteristic(hap.Characteristic.TargetMediaState)
+        .on('get', (callback: Function) => {
+          this.log.debug('Triggered GET TargetMediaState');
+
+          // set this to a valid value for CurrentMediaState
+          const currentValue = 0;
+      
+          callback(null, currentValue);
+        })
+        .on('set', (callback: Function) => {
+          this.log.debug('Triggered GET TargetMediaState');
+
+          // set this to a valid value for CurrentMediaState
+          const currentValue = 0;
+      
+          callback(null);
+        })
+
+      // @TODO: Implement media state
+
+      televisionService.getCharacteristic(hap.Characteristic.Active)
+        .on('get', (callback: Function) => {
+          this.log.info('Request power state');
+
+          Smartglass().discovery().then((consoles: any) => {
+            // console.log(consoles)
+            for(var xbox in consoles){
+              // console.log('- Device found: ' + consoles[xbox].message.name);
+              // console.log('  Address: '+ consoles[xbox].remote.address + ':' + consoles[xbox].remote.port);
+              // console.log(consoles[xbox].message.certificate)
+
+              const certPem = '-----BEGIN CERTIFICATE-----\n'+consoles[xbox].message.certificate.toString('base64').match(/.{0,64}/g).join('\n')+'-----END CERTIFICATE-----'
+              // console.log(certPem)
+              pem.readCertificateInfo(certPem, (error: any, certInfo: any) => {
+                  // console.log(error, certInfo)
+                  // console.log(certInfo.commonName)
+
+                  if(certInfo.commonName == liveid){
+                    this.log.debug('Console is on:', liveid)
+                    callback(null, true)
+                  } else {
+                    this.log.debug('Console is off:', liveid)
+                    callback(null, false)
+                  }
+              })
+            }
+            // console.log(consoles.length)
+            if(consoles.length == 0){
+              this.log.debug('Console is off:', liveid)
+              callback(null, false)
+            }
+          })
+
+          // this.apiClient.getProvider('smartglass').getConsoleStatus(liveid).then((consoleStatus: any) => {
+          //   this.log('consoleStatus', consoleStatus)
+
+          //   // var currentState = televisionService.getCharacteristic(hap.Characteristic.Active).value
+          //   // if(consoleStatus.powerState == 'On'){
+          //   //   if(currentState != 1){
+          //   //     televisionService.setCharacteristic(hap.Characteristic.Active, 1)
+          //   //   }
+          //   // } else {
+          //   //   if(currentState != 0){
+          //   //     televisionService.setCharacteristic(hap.Characteristic.Active, 0)
+          //   //   }
+          //   // }
+
+          //   // Possible powerstates are:
+          //   // On, ConnectedStandby, Off, SystemUpdate, Unknown
+          //   if(consoleStatus.powerState == 'On'){
+          //     callback(null, true)
+          //   } else {
+          //     callback(null, true)
+          //   }
+          // }).catch((error: any) => {
+          //   this.log('consoleStatus error', error)
+          //   callback(null)
+          // })
+        })
+        .on('set', (state: Number, callback: Function) => {
+          this.log.info('Set power state', state);
+          if(televisionService.getCharacteristic(hap.Characteristic.Active).value == 1 && state == 0){
+            this.log('Power off console')
+
+            this.apiClient.getProvider('smartglass').powerOff(liveid).then((consoleStatus: any) => {
+              console.log('power off result:', consoleStatus)
+            })
+          }
+          if(televisionService.getCharacteristic(hap.Characteristic.Active).value == 0 && state == 1){
+            this.log('Power on console')
+
+            this.apiClient.getProvider('smartglass').powerOn(liveid).then((consoleStatus: any) => {
+              console.log('power on result:', consoleStatus)
+            })
+          }
+          callback(null)
+        });
+
+      televisionService.getCharacteristic(hap.Characteristic.ActiveIdentifier)
+        .on('set', (newValue: Number, callback: Function) => {
+
+          // the value will be the value you set for the Identifier Characteristic
+          // on the Input Source service that was selected - see input sources below.
+
+          this.log.info('set Active Identifier => setNewValue: ' + newValue);
+          callback(null);
+        })
+
+      televisionService.getCharacteristic(hap.Characteristic.RemoteKey).on('set', (newValue: Number, callback: Function) => {
           this.log.info('set Remote Key Pressed: ', newValue)
 
           switch(newValue) {
@@ -230,20 +355,21 @@ class SmartglassPlatform implements DynamicPlatformPlugin {
         .setCharacteristic(hap.Characteristic.SerialNumber, liveid)
         .setCharacteristic(hap.Characteristic.FirmwareRevision, Package.version)
 
-      var inputSourceTv: any = accessory.addService(hap.Service.InputSource)
-      inputSourceTv.setCharacteristic(hap.Characteristic.Identifier, 1)
+      var inputSourceDashboard: any = accessory.addService(hap.Service.InputSource, 'dashboard', 'Dashboard')
+      inputSourceDashboard.setCharacteristic(hap.Characteristic.Identifier, 1)
+        .setCharacteristic(hap.Characteristic.ConfiguredName, 'Dashboard')
+        .setCharacteristic(hap.Characteristic.IsConfigured, hap.Characteristic.IsConfigured.CONFIGURED)
+        .setCharacteristic(hap.Characteristic.InputSourceType, hap.Characteristic.InputSourceType.HOME_SCREEN)
+      televisionService.addLinkedService(inputSourceDashboard);
+
+      var inputSourceTv: any = accessory.addService(hap.Service.InputSource, 'tv', 'TV')
+      inputSourceTv.setCharacteristic(hap.Characteristic.Identifier, 2)
         .setCharacteristic(hap.Characteristic.ConfiguredName, 'TV')
         .setCharacteristic(hap.Characteristic.IsConfigured, hap.Characteristic.IsConfigured.CONFIGURED)
-        .setCharacteristic(hap.Characteristic.InputSourceType, hap.Characteristic.InputSourceType.TUNER);
-      // televisionService.addLinkedService(inputSourceTv);
+        .setCharacteristic(hap.Characteristic.InputSourceType, hap.Characteristic.InputSourceType.TUNER)
+      televisionService.addLinkedService(inputSourceTv);
 
-      // service.getCharacteristic(hap.Characteristic.Identify)!
-      //   .on(CharacteristicEventTypes.SET, (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
-      //     if (value) {
-      //       const paired = true;
-      //       hap._identificationRequest(paired, callback);
-      //     }
-      //   });
+      // @TODO: Add apps from pins
 
       this.configureAccessory(accessory); // abusing the configureAccessory here
 
@@ -273,6 +399,8 @@ class SmartglassPlatform implements DynamicPlatformPlugin {
       for(let device in result.result){
         this.addAccessory(result.result[device].name, result.result[device].id, result.result[device].consoleType)
       }
+    }).catch((error: any) => {
+      this.log.info('Error refreshing consoles:', error)
     })
   }
 

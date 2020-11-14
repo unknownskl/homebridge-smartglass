@@ -35,6 +35,9 @@
     "homebridge": "^1.0.4"
   },
   "dependencies": {
-    "xbox-webapi": "^1.0.0"
+    "node-forge": "^0.10.0",
+    "pem": "^1.14.4",
+    "xbox-smartglass-core-node": "^0.6.5",
+    "xbox-webapi": "^1.0.1"
   }
 }
