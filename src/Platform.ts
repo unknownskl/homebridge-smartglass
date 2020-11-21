@@ -12,6 +12,8 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './Settings';
 
 const Package = require("../package.json")
 const XboxApiClient = require("xbox-webapi")
+const Smartglass = require("xbox-smartglass-core-node")
+const pem = require("pem")
 
 export class SmartglassPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
@@ -22,7 +24,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
   public readonly accessories: PlatformAccessory[] = [];
 
   public apiClient: typeof XboxApiClient;
-  public xboxMap: Object = {};
+  public xboxMap: any = {};
   public appMap: any = {};
   public applications: Array<String>;
 
@@ -201,6 +203,52 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
           this.launchApp(liveid, this.appMap[newValue.toString()].name, newValue)
 
           callback(null);
+        })
+
+      televisionService.getCharacteristic(this.api.hap.Characteristic.Active)
+        .on('get', (callback: Function) => {
+          this.log.debug('Request power state');
+
+          if(this.xboxMap[liveid] == undefined){
+            this.log.debug('Xbox not found before on network. Trying to get ip address...');
+            // Perform full network search
+            Smartglass().discovery().then((consoles: any) => {
+              for(var xbox in consoles){
+
+                const certPem = '-----BEGIN CERTIFICATE-----\n'+consoles[xbox].message.certificate.toString('base64').match(/.{0,64}/g).join('\n')+'-----END CERTIFICATE-----'
+                pem.readCertificateInfo(certPem, (error: any, certInfo: any) => {
+                  // Set ip address in xboxMap
+                  this.xboxMap[certInfo.commonName] = consoles[xbox].remote.address
+                })
+              }
+
+              // Check if we have detected the console we are looking for
+              setTimeout(() => {
+                if(this.xboxMap[liveid] == undefined){
+                  this.log.debug('Xbox is offline (not found on network)', this.xboxMap);
+                  callback(null, false)
+                } else {
+                  Smartglass().discovery(this.xboxMap[liveid]).then((consoles: any) => {
+                    this.log.debug('Xbox is online');
+                    callback(null, true)
+                  }).catch((error: any) => {
+                    this.log.debug('Xbox is offline. Reason:', error);
+                    callback(null, false)
+                  })
+                }
+              }, 500)
+            })
+          } else {
+            this.log.debug('Xbox found on network before. Trying to ping', this.xboxMap[liveid]);
+
+            Smartglass().discovery(this.xboxMap[liveid]).then((consoles: any) => {
+              this.log.debug('Xbox is online');
+              callback(null, true)
+            }).catch((error: any) => {
+              this.log.debug('Xbox is offline. Reason:', error);
+              callback(null, false)
+            })
+          }
         })
 
       televisionService.getCharacteristic(this.api.hap.Characteristic.RemoteKey).on('set', (newValue: Number, callback: Function) => {
