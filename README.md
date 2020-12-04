@@ -2,8 +2,8 @@
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_shield)
 
 
-This module is an Accessory plugin for Homebridge which allows you to control your Xbox using Homekit and the new Remote control introduced in iOS 12.2.
-Currently still in beta.
+Homebridge-Smartglass is an Accessory plugin for Homebridge which allows you to control your Xbox using Homekit and the new Remote control introduced in iOS 12.2.
+Comminucation is done via the Xbox live api and leverages xbox-smartglass-core-node for the status dectection on the local network.
 
 Requirements:
 - NodeJS >= 10.x
@@ -21,51 +21,28 @@ Install the plugin:
 
 ## Setting up the Xbox
 
-The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
+You need to authenticate with the Xbox live api. Instructions for the authentication can be found in the log view.
 
 ### Homebridge configuration
 
 Add the Accessory in your Homebridge config:
 
-    "accessories": [
+    "platform": [
         {
-            "accessory": "Smartglass",
-            "name": "Xbox One",
-            "liveid": "FD00000000000000",
-            "consoleip": "192.168.2.5",
+            "platform": "Smartglass",
             "apps": [
-                {
-                    "name": "Spotify",
-                    "uri": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App"
-                },
-                {
-                    "name": "Youtube",
-                    "uri": "GoogleInc.YouTube_yfg5n0ztvskxp!App"
-                },
-                {
-                    "name": "Netflix",
-                    "uri": "4DF9E0F8.Netflix_mcm4njqhnhss8!App"
-                },
-                {
-                    "name": "Airserver",
-                    "uri": "F3F176BD.53203526D8F6C_p8qzvses5c8me!AirServer",
-                    "type": "Characteristic.InputSourceType.AIRPLAY"
-                }
+                "Spotify",
+                "Twitch",
+                "Destiny 2",
+                "No mans sky"
             ]
         }
     ],
 
-| Key | Explanation |
-|-----|-------------|
-| `liveid` | This needs to contain your Xbox live id. You can get this live id in the console settings. |
-| `consoleip` | This needs to contain your xbox console ip. Best is to set a static ip on the console. |
-| `apps` | This part is optional. You can define extra apps here to show them in Homekit |
-
 
 ### Known issues
 
-- Bug: Plugin can crash homebridge sometimes, it is still in beta!
-- Only one Xbox per homebridge instance is tested.
+The plugin can have some quirks. Please open an issue if you have problems.
 
 
 ## License
