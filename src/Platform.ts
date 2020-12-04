@@ -36,6 +36,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
     this.apiClient = XboxApiClient({
       clientId: '5e5ead27-ed60-482d-b3fc-702b28a97404'
     });
+    this.apiClient._authentication._tokensFile = this.config.tokens_file || '.tokens.json'
     this.applications = this.config.apps || []
 
     this.log.debug('Finished initializing platform:', this.config.platform);
