@@ -58,7 +58,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
               log.info('User has been logged in')
               this.xboxDiscovery()
 
-            }).catch((error: any) => {
+            }, this.config.oauth_port || 5557).catch((error: any) => {
               log.info(error)
             })
           })
