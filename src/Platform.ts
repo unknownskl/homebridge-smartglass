@@ -95,7 +95,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
   }
 
   launchApp(consoleId: String, titleName: String, identifierId: Number) {
-    this.log.info("Change input on:", consoleId);
+    this.log.info("Change input on:", consoleId, 'to', this.appMap[identifierId.toString()].name);
 
     if(this.appMap[identifierId.toString()].storeId === undefined){
       // Storeid is not cached, search for product in store
@@ -144,6 +144,8 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
         .setCharacteristic(this.api.hap.Characteristic.Model, consoletype)
         .setCharacteristic(this.api.hap.Characteristic.SerialNumber, liveid)
         .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, Package.version)
+        // .setCharacteristic(this.api.hap.Characteristic.HardwareRevision, Package.version)
+        // .setCharacteristic(this.api.hap.Characteristic.SoftwareRevision, Package.version)
 
       var inputSourceDashboard: any = accessory.addService(this.api.hap.Service.InputSource, 'dashboard', 'Dashboard')
       inputSourceDashboard.setCharacteristic(this.api.hap.Characteristic.Identifier, 1)
@@ -170,13 +172,6 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
         this.appMap[2] = {
           name: 'Tv',
           id: 'tv'
-        }
-      }
-
-      this.appMap = {
-        1: {
-          name: 'Dashboard',
-          id: 'dashboard',
         }
       }
 
