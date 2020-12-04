@@ -58,10 +58,10 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
               log.info('User has been logged in')
               this.xboxDiscovery()
 
-            }, this.config.oauth_port || 5557).catch((error: any) => {
+            }).catch((error: any) => {
               log.info(error)
             })
-          })
+          }, this.config.oauth_port || 5557)
           log.warn('Open the following link to authenticate with the Xbox Live API:', url)
       })
     });
