@@ -86,12 +86,19 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
       this.log.debug('Xbox consoles found:', result.result)
 
       this.removeAccessories()
+      var accessories:any = []
       for(let device in result.result){
-        this.addAccessory(result.result[device].name, result.result[device].id, result.result[device].consoleType)
+        let acc:any = this.addAccessory(result.result[device].name, result.result[device].id, result.result[device].consoleType)
+        accessories.push(acc[0])
       }
+      this.api.publishExternalAccessories(PLUGIN_NAME, accessories);
     }).catch((error: any) => {
       this.log.warn('Error refreshing consoles:', error)
     })
+  }
+
+  setActiveApp(name:string){
+    console.log('Current app:', name)
   }
 
   launchApp(consoleId: String, titleName: String, identifierId: Number) {
@@ -147,6 +154,21 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
         // .setCharacteristic(this.api.hap.Characteristic.HardwareRevision, Package.version)
         // .setCharacteristic(this.api.hap.Characteristic.SoftwareRevision, Package.version)
 
+      var inputSourceOther: any = accessory.addService(this.api.hap.Service.InputSource, 'other', 'Other')
+      inputSourceOther.setCharacteristic(this.api.hap.Characteristic.Identifier, 0)
+        .setCharacteristic(this.api.hap.Characteristic.ConfiguredName, 'Other')
+        .setCharacteristic(this.api.hap.Characteristic.IsConfigured, this.api.hap.Characteristic.IsConfigured.CONFIGURED)
+        .setCharacteristic(this.api.hap.Characteristic.InputSourceType, this.api.hap.Characteristic.InputSourceType.OTHER)
+        .setCharacteristic(this.api.hap.Characteristic.CurrentVisibilityState, this.api.hap.Characteristic.CurrentVisibilityState.HIDDEN);
+      televisionService.addLinkedService(inputSourceOther);
+
+      this.appMap = {
+        0: {
+          name: 'Other',
+          id: 'other',
+        }
+      }
+
       var inputSourceDashboard: any = accessory.addService(this.api.hap.Service.InputSource, 'dashboard', 'Dashboard')
       inputSourceDashboard.setCharacteristic(this.api.hap.Characteristic.Identifier, 1)
         .setCharacteristic(this.api.hap.Characteristic.ConfiguredName, 'Dashboard')
@@ -199,6 +221,29 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
 
           callback(null);
         })
+        .on('get', (callback: Function) => {
+          // this.launchApp(liveid, this.appMap[newValue.toString()].name, newValue)
+          this.apiClient.getProvider('people').get('/users/me/people/xuids('+this.apiClient._authentication._user.xid +')/decoration/detail,presenceDetail').then((result:any) => {
+            this.log.debug('Active app fetched from xbox api:', result.people[0].presenceText)
+            
+            // Process app name
+
+            var currentAppId:string = '1'
+
+            for(let app in this.appMap){
+              if(result.people[0].presenceText == this.appMap[app].name){
+                // console.log('App:', app, this.appMap[app])
+                currentAppId = app
+              }
+            }
+
+            callback(null, currentAppId);
+
+          }).catch((error: any) => {
+            this.log.debug('Error fetching active app from xbox api: ', error);
+            callback(null);
+          })
+        })
 
       televisionService.getCharacteristic(this.api.hap.Characteristic.Active)
         .on('get', (callback: Function) => {
@@ -226,6 +271,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
                   Smartglass().discovery(this.xboxMap[liveid]).then((consoles: any) => {
                     this.log.debug('Xbox is online');
                     callback(null, true)
+
                   }).catch((error: any) => {
                     this.log.debug('Xbox is offline. Reason:', error);
                     callback(null, false)
@@ -238,6 +284,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
 
             Smartglass().discovery(this.xboxMap[liveid]).then((consoles: any) => {
               this.log.debug('Xbox is online');
+
               callback(null, true)
             }).catch((error: any) => {
               this.log.debug('Xbox is offline. Reason:', error);
@@ -296,6 +343,9 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
           }
           case this.api.hap.Characteristic.RemoteKey.SELECT: {
             this.log.info('set Remote Key Pressed: SELECT');
+            this.apiClient.getProvider('smartglass').sendButtonPress(liveid, 'A').then(() => {}).catch((error: any) => {
+              this.log.info('Error sending button press:', error)
+            })
             break;
           }
           case this.api.hap.Characteristic.RemoteKey.BACK: {
@@ -328,7 +378,7 @@ export class SmartglassPlatform implements DynamicPlatformPlugin {
       this.configureAccessory(accessory); // abusing the configureAccessory here
 
       // this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+      // this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
       return [accessory]
     } else {
       this.log.info("Accessory already exists: %s", name);
