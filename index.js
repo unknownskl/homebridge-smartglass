@@ -222,13 +222,15 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
             tries: 10, // Number of packets too issue the boot command (Optional)
             ip: this.consoleip // Your consoles ip address (Optional)
         }).then(function(){
-            callback(null, true);
+            // callback(null, true);
 
         }, function(error){
             // Failed
+            console.log('Smartglass power on request failed, reason:')
             console.log(error)
-            callback(error);
         });
+
+        callback(null, true);
     } else {
         if(state != 1){
             // Power Off
@@ -238,6 +240,7 @@ SmartglassDevice.prototype.set_power_state = function(state, callback)
 
             }.bind(this), function(error){
                 // Failed to turn off console
+                console.log('Smartglass power off request failed, reason:')
                 console.log(error)
                 callback(error);
             });
