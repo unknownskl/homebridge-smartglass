@@ -1,9 +1,11 @@
 {
+  "private": true,
+  "displayName": "Xbox Smartglass",
   "name": "homebridge-smartglass",
-  "version": "0.16.2",
+  "version": "1.0.0",
   "description": "Smartglass plugin for homebridge. Allows you to control your Xbox using Homekit",
-  "main": "index.js",
-  "license": "MIT",
+  "main": "dist/index.js",
+  "license": "Apache-2.0",
   "homepage": "http://github.com/unknownskl/homebridge-smartglass",
   "keywords": [
     "homebridge-plugin",
@@ -17,11 +19,28 @@
   "bugs": {
     "url": "http://github.com/unknownskl/homebridge-smartglass/issues"
   },
+  "scripts": {
+    "lint": "eslint src/**.ts --max-warnings=0",
+    "watch": "npm run build && npm link && nodemon",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run lint && npm run build"
+  },
   "engines": {
-    "node": ">=0.10.0",
-    "homebridge": ">=0.4.0"
+    "node": ">=10.17.0",
+    "homebridge": ">=1.0.0"
   },
   "dependencies": {
     "xbox-smartglass-core-node": "^0.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.22",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.18.0",
+    "homebridge": "^1.2.5",
+    "nodemon": "^2.0.7",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   }
 }
