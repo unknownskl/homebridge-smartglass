@@ -4,9 +4,9 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { SmartglassAccessory } from './platformAccessory';
 
 interface DeviceConfig {
-  name: string
-  ipaddress: string
-  liveid: string
+  name: string;
+  ipaddress: string;
+  liveid: string;
   // encKey?: string
   // appId?: string
   // customVolumeSlider?: boolean

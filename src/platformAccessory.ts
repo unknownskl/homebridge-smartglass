@@ -6,6 +6,7 @@ import Smartglass from 'xbox-smartglass-core-node';
 import SystemInputChannel from 'xbox-smartglass-core-node/src/channels/systeminput';
 import SystemMediaChannel from 'xbox-smartglass-core-node/src/channels/systemmedia';
 import TvRemoteChannel from 'xbox-smartglass-core-node/src/channels/tvremote';
+import packageInfo from '../package.json';
 
 /**
  * Platform Accessory
@@ -28,8 +29,8 @@ export class SmartglassAccessory {
   private SGClient = Smartglass();
   private deviceState = {
     isConnected: false,
-    powerState: false
-  }
+    powerState: false,
+  };
 
   constructor(
     private readonly platform: SmartglassPlatform,
@@ -44,7 +45,7 @@ export class SmartglassAccessory {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
+    this.service = this.accessory.getService(this.platform.Service.Television)||this.accessory.addService(this.platform.Service.Television);
 
     accessory.category = this.platform.api.hap.Categories.TV_SET_TOP_BOX;
 
@@ -52,14 +53,14 @@ export class SmartglassAccessory {
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device.name);
     this.service.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
-    this.service.setCharacteristic(this.platform.Characteristic.FirmwareRevision, require('../package.json').version)
+    this.service.setCharacteristic(this.platform.Characteristic.FirmwareRevision, packageInfo.version);
 
     this.service.getCharacteristic(this.platform.Characteristic.Active)
       .on('set', this.setOn.bind(this))
-      .on('get', this.getOn.bind(this))
+      .on('get', this.getOn.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.RemoteKey)
-      .on('set', this.setRemoteKey.bind(this))
+      .on('set', this.setRemoteKey.bind(this));
 
     this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, 1);
 
@@ -76,12 +77,12 @@ export class SmartglassAccessory {
     //   .on('set', this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
 
     this.speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) || this.accessory.addService(this.platform.Service.TelevisionSpeaker);
-    this.speakerService.setCharacteristic(this.platform.Characteristic.Active, 1)
-    this.speakerService.setCharacteristic(this.platform.Characteristic.VolumeControlType, this.platform.Characteristic.VolumeControlType.ABSOLUTE)
+    this.speakerService.setCharacteristic(this.platform.Characteristic.Active, 1);
+    this.speakerService.setCharacteristic(this.platform.Characteristic.VolumeControlType, this.platform.Characteristic.VolumeControlType.ABSOLUTE);
 
     this.speakerService
-        .getCharacteristic(this.platform.Characteristic.VolumeSelector)
-        .on('set', this.setVolume.bind(this));
+      .getCharacteristic(this.platform.Characteristic.VolumeSelector)
+      .on('set', this.setVolume.bind(this));
 
     this.service.addLinkedService(this.speakerService);
 
@@ -148,25 +149,25 @@ export class SmartglassAccessory {
             this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
 
             // Setup Smartglass client config
-            this.SGClient.addManager('system_input', SystemInputChannel())
-            this.SGClient.addManager('system_media', SystemMediaChannel())
-            this.SGClient.addManager('tv_remote', TvRemoteChannel())
+            this.SGClient.addManager('system_input', SystemInputChannel());
+            this.SGClient.addManager('system_media', SystemMediaChannel());
+            this.SGClient.addManager('tv_remote', TvRemoteChannel());
 
             this.SGClient.on('_on_timeout', () => {
               this.platform.log.info('Smartglass connection timeout detected. Reconnecting...');
-              this.deviceState.isConnected = false
-            })
+              this.deviceState.isConnected = false;
+            });
 
           }).catch((error) => {
             this.platform.log.debug('Failed to connect to xbox. Reason:', error);
             this.deviceState.isConnected = false;
             this.deviceState.powerState = false;
-          })
+          });
         }).catch(() => {
           this.platform.log.debug('Failed to discover xbox on ip:', accessory.context.device.ipaddress);
           this.deviceState.isConnected = false;
           this.deviceState.powerState = false;
-        })
+        });
       }
     }, 10000);
     
@@ -180,9 +181,8 @@ export class SmartglassAccessory {
 
     // this.deviceState.isConnected = false;
 
-    this.platform.log.debug('Set Characteristic On ->', value, this.deviceState.powerState, (this.deviceState.powerState == value));
     
-    if(this.deviceState.powerState == value){
+    if((this.deviceState.powerState?1:0) === value){
       this.platform.log.debug('Set Characteristic not changes. Ignoring ('+value+')');
     } else {
 
@@ -199,7 +199,7 @@ export class SmartglassAccessory {
           this.platform.log.debug('Failed to turn off xbox:', error);
           this.deviceState.isConnected = false;
           this.deviceState.powerState = false;
-        })
+        });
       } else {
 
         // Power on
@@ -214,7 +214,7 @@ export class SmartglassAccessory {
         }).then((error) => {
           this.platform.log.debug('Failed to turn on xbox:', error);
           this.deviceState.isConnected = false;
-        })
+        });
       }
       
     }
@@ -250,8 +250,8 @@ export class SmartglassAccessory {
 
   setRemoteKey(newValue: CharacteristicValue, callback: CharacteristicSetCallback) {
 
-    var inputKey
-    var inputType
+    let inputKey;
+    let inputType;
     // implement your own code to check if the device is on
     switch(newValue) {
       case this.platform.Characteristic.RemoteKey.REWIND: {
@@ -272,79 +272,79 @@ export class SmartglassAccessory {
       }
       case this.platform.Characteristic.RemoteKey.ARROW_UP: {
         this.platform.log.debug('set Remote Key Pressed: ARROW_UP');
-        inputKey = 'up'
-        inputType = 'input'
+        inputKey = 'up';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
         this.platform.log.debug('set Remote Key Pressed: ARROW_DOWN');
-        inputKey = 'down'
-        inputType = 'input'
+        inputKey = 'down';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
         this.platform.log.debug('set Remote Key Pressed: ARROW_LEFT');
-        inputKey = 'left'
-        inputType = 'input'
+        inputKey = 'left';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
         this.platform.log.debug('set Remote Key Pressed: ARROW_RIGHT');
-        inputKey = 'right'
-        inputType = 'input'
+        inputKey = 'right';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.SELECT: {
         this.platform.log.debug('set Remote Key Pressed: SELECT');
-        inputKey = 'a'
-        inputType = 'input'
+        inputKey = 'a';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.BACK: {
         this.platform.log.debug('set Remote Key Pressed: BACK');
-        inputKey = 'b'
-        inputType = 'input'
+        inputKey = 'b';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.EXIT: {
         this.platform.log.debug('set Remote Key Pressed: EXIT');
-        inputKey = 'nexus'
-        inputType = 'input'
+        inputKey = 'nexus';
+        inputType = 'input';
         break;
       }
       case this.platform.Characteristic.RemoteKey.PLAY_PAUSE: {
         this.platform.log.debug('set Remote Key Pressed: PLAY_PAUSE');
-        inputKey = 'playpause'
-        inputType = 'media'
+        inputKey = 'playpause';
+        inputType = 'media';
         break;
       }
       case this.platform.Characteristic.RemoteKey.INFORMATION: {
         this.platform.log.debug('set Remote Key Pressed: INFORMATION');
-        inputKey = 'nexus'
-        inputType = 'input'
+        inputKey = 'nexus';
+        inputType = 'input';
         break;
       }
     }
 
-    if(inputType == 'input'){
-      this.SGClient.getManager('system_input').sendCommand(inputKey).then((response) => {
+    if(inputType === 'input'){
+      this.SGClient.getManager('system_input').sendCommand(inputKey).then(() => {
         // platform.log("Send input key:", input_key);
         callback(null);
 
       }).catch((error) => {
-        this.platform.log.info('Error sendding key input', inputKey, error)
+        this.platform.log.info('Error sendding key input', inputKey, error);
         callback(null);
-      })
+      });
 
     } else {
-      this.SGClient.getManager('system_media').sendCommand(inputKey).then((response) => {
+      this.SGClient.getManager('system_media').sendCommand(inputKey).then(() => {
         // platform.log("Send media key:", input_key);
         callback(null);
 
       }).catch((error) => {
-        this.platform.log.info('Error sending key input', inputKey, error)
+        this.platform.log.info('Error sending key input', inputKey, error);
         callback(null);
-      })
+      });
     }
   }
 
@@ -353,15 +353,15 @@ export class SmartglassAccessory {
     this.platform.log.debug('setVolume called with: ' + value);
 
     this.SGClient.getManager('tv_remote').sendIrCommand(value?'btn.vol_down':'btn.vol_up').then(() => {
-      this.platform.log.debug('Sent command ', value?'vol_down':'vol_up')
-    // this.SGClient.getManager('system_input').sendCommand(value?'vol_down':'vol_up').then((response) => {
+      this.platform.log.debug('Sent command ', value?'vol_down':'vol_up');
+      // this.SGClient.getManager('system_input').sendCommand(value?'vol_down':'vol_up').then((response) => {
       // platform.log("Send input key:", input_key);
       callback(null);
 
     }).catch((error) => {
-      this.platform.log.info('Error sendding key input', value?'vol_down':'vol_up', error)
+      this.platform.log.info('Error sendding key input', value?'vol_down':'vol_up', error);
       callback(null);
-    })
+    });
 
     // let command = this.device.codes.volume.up;
     // if (value === this.platform.Characteristic.VolumeSelector.DECREMENT) {
