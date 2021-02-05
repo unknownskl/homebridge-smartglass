@@ -1,49 +1,15 @@
 {
-  "pluginAlias": "Smartglass",
-  "pluginType": "accessory",
-  "footerDisplay": "This plugin works with Xbox One which is available [here](https://github.com/unknownskl/homebridge-smartglass).",
+  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginType": "platform",
+  "singular": true,
   "schema": {
     "type": "object",
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
-        "default": "Xbox One",
-        "required": true
-      },
-      "liveid": {
-        "title": "Live ID",
-        "type": "string",
-        "default": "FD00000000",
-        "required": true
-      },
-      "consoleip": {
-        "title": "IP Address",
-        "type": "string",
         "required": true,
-        "format": "hostname",
-        "required": true
-      },
-      "apps": {
-        "name": "apps",
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "title": "App name",
-              "type": "string",
-              "default": "Spotify",
-              "required": true
-            },
-            "uri": {
-              "title": "App reference",
-              "type": "string",
-               "default": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App",
-              "required": true
-            }
-          }
-        }
+        "default": "Example Dynamic Platform"
       }
     }
   }
