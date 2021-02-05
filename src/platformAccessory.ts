@@ -6,7 +6,7 @@ import Smartglass from 'xbox-smartglass-core-node';
 import SystemInputChannel from 'xbox-smartglass-core-node/src/channels/systeminput';
 import SystemMediaChannel from 'xbox-smartglass-core-node/src/channels/systemmedia';
 import TvRemoteChannel from 'xbox-smartglass-core-node/src/channels/tvremote';
-import packageInfo from './package-info.json'
+import packageInfo from './package-info.json';
 
 /**
  * Platform Accessory
