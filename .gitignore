@@ -1,5 +1,7 @@
 # Ignore compiled code
 dist
+.homebridge/accessories
+.homebridge/persist
 
 # ------------- Defaults ------------- #
 
