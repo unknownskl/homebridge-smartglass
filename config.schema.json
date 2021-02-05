@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "Smartglass",
   "pluginType": "platform",
   "singular": true,
   "schema": {
