@@ -1,5 +1,4 @@
 {
-  "private": true,
   "displayName": "Xbox Smartglass",
   "name": "homebridge-smartglass",
   "version": "1.0.1-beta.0",
