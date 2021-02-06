@@ -625,10 +625,10 @@ export class SmartglassAccessory {
     // this.launchApp(this.accessory.context.config.liveid, this.appMap[newValue.toString()].name, newValue)
     this.platform.log.info('setCurrentApplication() invoked to ->', value);
 
-    if(this.deviceState.webApiEnabled === true){
+    const newValue = parseInt(value.toString())-1;
+    const inputSourceTitleId = this.inputSources[newValue].title_id;
 
-      const newValue = parseInt(value.toString())-1;
-      const inputSourceTitleId = this.inputSources[newValue].title_id;
+    if(this.deviceState.webApiEnabled === true){
 
       if(inputSourceTitleId !== undefined){
         // Got titleid, launch app.
