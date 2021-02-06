@@ -20,7 +20,7 @@
     "url": "http://github.com/unknownskl/homebridge-smartglass/issues"
   },
   "scripts": {
-    "lint": "npm run version && eslint src/**.ts --max-warnings=0",
+    "lint": "npm run version && eslint src/**.ts --max-warnings=3 --fix",
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && npm run version && tsc",
     "prepublishOnly": "npm run lint && npm run build",
