@@ -6,7 +6,9 @@ import Smartglass from 'xbox-smartglass-core-node';
 import SystemInputChannel from 'xbox-smartglass-core-node/src/channels/systeminput';
 import SystemMediaChannel from 'xbox-smartglass-core-node/src/channels/systemmedia';
 import TvRemoteChannel from 'xbox-smartglass-core-node/src/channels/tvremote';
+
 import packageInfo from './package-info.json';
+import XboxApi from 'xbox-webapi';
 
 /**
  * Platform Accessory
@@ -27,15 +29,54 @@ export class SmartglassAccessory {
   };
 
   private SGClient = Smartglass();
+  private ApiClient = XboxApi({
+    clientId: this.platform.config.clientId || '5e5ead27-ed60-482d-b3fc-702b28a97404',
+    clientSecret: this.platform.config.clientSecret || false,
+  });
+
   private deviceState = {
     isConnected: false,
     powerState: false,
+    webApiEnabled: false,
   };
 
   constructor(
     private readonly platform: SmartglassPlatform,
     private readonly accessory: PlatformAccessory,
   ) {
+
+    // Setup api
+    this.platform.log.debug('Checking Xbox api capabilities...')
+
+    this.ApiClient.isAuthenticated().then(() => {
+      // User is authenticated
+      this.platform.log.debug('User is authenticated with the Xbox api. Enabling functionalities');
+      this.deviceState.webApiEnabled = true;
+
+    }).catch((error) => {
+      this.platform.log.info('Xbox login url available at:', this.ApiClient._authentication.generateAuthorizationUrl())
+      this.platform.log.info('Copy the token after login into you config: "apiToken": "<value>" to enable the Xbox api')
+      this.platform.log.debug('Current Token:', this.platform.config.apiToken)
+
+      if(this.platform.config.apiToken !== undefined){
+        this.platform.log.info('Trying to authenticate using configured token...')
+
+        this.ApiClient._authentication.getTokenRequest(this.platform.config.apiToken).then((data) => {
+          this.platform.log.info('User is authenticated')
+          this.platform.log.debug('Got oauth token:', data)
+
+          this.ApiClient._authentication._tokens.oauth = data
+          this.ApiClient._authentication.saveTokens()
+          this.deviceState.webApiEnabled = true;
+
+        }).catch((error) =>{
+            this.platform.log.info('User failed to authenticate:', error)
+        })
+      } else {
+        // Xbox webapi not available
+        this.platform.log.info('User failed to authenticate. Disabling Xbox api functionalities')
+      }
+    });
 
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -352,16 +393,37 @@ export class SmartglassAccessory {
     // 0 = up, 1 = down
     this.platform.log.debug('setVolume called with: ' + value);
 
-    this.SGClient.getManager('tv_remote').sendIrCommand(value?'btn.vol_down':'btn.vol_up').then(() => {
-      this.platform.log.debug('Sent command ', value?'vol_down':'vol_up');
-      // this.SGClient.getManager('system_input').sendCommand(value?'vol_down':'vol_up').then((response) => {
-      // platform.log("Send input key:", input_key);
+    if(this.deviceState.webApiEnabled === false){
+
+      this.SGClient.getManager('tv_remote').sendIrCommand(value?'btn.vol_down':'btn.vol_up').then(() => {
+        this.platform.log.debug('Sent command ', value?'vol_down':'vol_up');
+        // this.SGClient.getManager('system_input').sendCommand(value?'vol_down':'vol_up').then((response) => {
+        // platform.log("Send input key:", input_key);
+        callback(null);
+  
+      }).catch((error) => {
+        this.platform.log.info('Error sending key input', value?'vol_down':'vol_up', error);
+        callback(null);
+      });
+
+    } else {
+
+      this.ApiClient.isAuthenticated().then(() => {
+        this.ApiClient.getProvider('smartglass')._sendCommand(this.accessory.context.device.liveid, 'Audio', 'Volume', [{
+          "direction": (value ? 'Down':'Up'), "amount": 1
+        }]).then(() => {
+          this.platform.log.debug('Sent volume command to xbox via Xbox api');
+        }).catch((error ) => {
+          this.platform.log.debug('Failed to send volume command to xbox via Xbox api:', error);
+        });
+      }).catch((error) => {
+        this.platform.log.info('Failed to authenticate user:', error);
+      })
+
       callback(null);
 
-    }).catch((error) => {
-      this.platform.log.info('Error sendding key input', value?'vol_down':'vol_up', error);
-      callback(null);
-    });
+    }
+    
 
     // let command = this.device.codes.volume.up;
     // if (value === this.platform.Characteristic.VolumeSelector.DECREMENT) {

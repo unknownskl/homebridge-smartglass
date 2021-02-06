@@ -31,7 +31,8 @@
     "homebridge": ">=1.0.0"
   },
   "dependencies": {
-    "xbox-smartglass-core-node": "^0.6.7"
+    "xbox-smartglass-core-node": "^0.6.7",
+    "xbox-webapi": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.22",
