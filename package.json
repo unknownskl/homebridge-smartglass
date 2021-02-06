@@ -2,7 +2,7 @@
   "private": true,
   "displayName": "Xbox Smartglass",
   "name": "homebridge-smartglass",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.1-beta.0",
   "description": "Smartglass plugin for homebridge. Allows you to control your Xbox using Homekit",
   "main": "dist/index.js",
   "license": "Apache-2.0",
