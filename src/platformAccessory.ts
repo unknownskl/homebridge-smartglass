@@ -48,31 +48,13 @@ export class SmartglassAccessory {
       type: this.platform.Characteristic.InputSourceType.OTHER,
       hidden: true,
       aum_id: '0',
+      title_id: '',
     }, {
       name: 'Dashboard',
       type: this.platform.Characteristic.InputSourceType.HOME_SCREEN,
       aum_id: 'Xbox.Dashboard_8wekyb3d8bbwe!Xbox.Dashboard.Application',
       hidden: true,
-    }, {
-      name: 'Twitch',
-      type: this.platform.Characteristic.InputSourceType.APPLICATION,
-      aum_id: 'TwitchInteractive.TwitchApp_7kd9w9e3c5jra!Twitch',
-      title_id: '442736763',
-    }, {
-      name: 'Spotify',
-      type: this.platform.Characteristic.InputSourceType.APPLICATION,
-      aum_id: 'SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App',
-      title_id: '1693425033',
-    }, {
-      name: 'Youtube',
-      type: this.platform.Characteristic.InputSourceType.APPLICATION,
-      aum_id: 'GoogleInc.YouTube_yfg5n0ztvskxp!App',
-      title_id: '122001257',
-    }, {
-      name: 'Destiny 2',
-      type: this.platform.Characteristic.InputSourceType.APPLICATION,
-      aum_id: 'Bungie.Destiny2basegame_8xb1a0vv8ay84!tiger.ReleaseFinal',
-      title_id: '144389848',
+      title_id: '',
     },
   ];
 
@@ -86,6 +68,7 @@ export class SmartglassAccessory {
     // Setup api
     this.platform.log.debug('Checking Xbox api capabilities...');
 
+    this.ApiClient._authentication._tokensFile = this.platform.api.user.storagePath()+'/.smartglass.tokens.json';
     this.ApiClient.isAuthenticated().then(() => {
       // User is authenticated
       this.platform.log.debug('User is authenticated with the Xbox api. Enabling functionalities');
@@ -161,6 +144,20 @@ export class SmartglassAccessory {
       .on('set', this.setVolume.bind(this));
 
     this.service.addLinkedService(this.speakerService);
+
+    // Prepare input sources
+    for(const app in this.accessory.context.device.inputs){
+      this.platform.log.debug('Adding input source to config:', this.accessory.context.device.inputs[app].name);
+
+      this.inputSources.push({
+        name: this.accessory.context.device.inputs[app].name,
+        type: this.platform.Characteristic.InputSourceType.APPLICATION,
+        aum_id: this.accessory.context.device.inputs[app].aum_id,
+        title_id: this.accessory.context.device.inputs[app].title_id || '',
+        hidden: false,
+      });
+
+    }
 
     // Configure input sources
     for(const id in this.inputSources){
@@ -239,6 +236,18 @@ export class SmartglassAccessory {
             // this.platform.log.info('[Smartglass] Xbox switched to app:', response.packet_decoded.protected_payload.apps[0], activeInputId)
             this.platform.log.info('Xbox app change detected. aum_id:', response.packet_decoded.protected_payload.apps[0].aum_id,
               'title_id:', response.packet_decoded.protected_payload.apps[0].title_id);
+
+            // const inputSource = this.accessory.getService('input1') || this.accessory.addService(this.platform.Service.InputSource, 'input1', 'input1');
+
+            // this.getAppByTitleId(this.deviceState.currentTitleId).then((result:any) => {
+            //   this.platform.log.info('Set source to:', result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
+            //   inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
+            //   this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
+            // }).catch(() => {
+            //   this.platform.log.info('Set source to other');
+            //   inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'Other');
+            // });
+
             this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
           }
         }
@@ -595,7 +604,7 @@ export class SmartglassAccessory {
   getModel(liveid: string) {
     if(this.deviceState.webApiEnabled === true){
       this.ApiClient.getProvider('smartglass').getConsoleStatus(liveid).then((result)=> {
-        this.platform.log.info('resolve', result.consoleType);
+        this.platform.log.debug('Get xbox console type from Xbox API:', result.consoleType);
 
         let consoleType;
 
@@ -625,7 +634,7 @@ export class SmartglassAccessory {
           .setCharacteristic(this.platform.Characteristic.Model, consoleType);
 
       }).catch((error)=> {
-        this.platform.log.info('reject', error);
+        this.platform.log.debug('Failed to get xbox console type from Xbox API:', error);
       });
     }
   }

@@ -2,6 +2,7 @@
 dist
 .homebridge/accessories
 .homebridge/persist
+.homebridge/.*.tokens.json
 
 # ------------- Defaults ------------- #
 

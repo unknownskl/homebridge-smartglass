@@ -2,14 +2,15 @@
   "pluginAlias": "Smartglass",
   "pluginType": "platform",
   "singular": true,
+  "footerDisplay": "For documentation please see [GitHub repository](https://github.com/unknownskl/homebridge-smartglass)",
   "schema": {
     "type": "object",
     "properties": {
       "devices": {
-        "title": "Devices",
+        "title": "Xbox Consoles",
         "type": "array",
         "items": {
-          "title": "Console",
+          "title": "Xbox",
           "type": "object",
           "properties": {
             "name": {
@@ -20,19 +21,51 @@
             "ipaddress": {
               "title": "IP Address",
               "type": "string",
-              "required": true
+              "required": true,
+              "format": "ipv4",
+              "placeholder": "192.168.1.55"
             },
             "liveid": {
               "title": "Console Live ID",
               "type": "string",
-              "required": true
+              "required": true,
+              "pattern": "^F[A-Fa-f0-9]{15}$",
+              "description": "Your Console Live ID can be found in the settings.",
+              "placeholder": "F000000000000000"
+            },
+            "inputs": {
+              "title": "Source inputs",
+              "type": "array",
+              "items": {
+                "title": "Input",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "required": true
+                  },
+                  "aum_id": {
+                    "title": "Aum title ID",
+                    "type": "string",
+                    "required": true,
+                    "description": "Required to detect which application or game is currently running."
+                  },
+                  "title_id": {
+                    "title": "Title ID",
+                    "type": "string",
+                    "description": "The title id makes it possible to switch the app on the xbox console."
+                  }
+                }
+              }
             }
           }
         }
       },
       "apiToken": {
         "title": "Xbox API Token",
-        "type": "string"
+        "type": "string",
+        "description": "You can authenticate with the Xbox Api to enable extra features such as switching apps. Check the console for more information."
       }
     }
   }

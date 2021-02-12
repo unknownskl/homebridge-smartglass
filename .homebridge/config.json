@@ -18,5 +18,37 @@
     ],
   
     "platforms": [
+      {
+        "platform": "Smartglass",
+        "devices": [
+          {
+            "name": "Xbox Series S",
+            "ipaddress": "192.168.2.9",
+            "liveid": "F000000000000000",
+            "inputs": [
+              {
+                "name": "Twitch",
+                "aum_id": "TwitchInteractive.TwitchApp_7kd9w9e3c5jra!Twitch",
+                "title_id": "442736763"
+              },
+              {
+                "name": "Spotify",
+                "aum_id": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App",
+                "title_id": "1693425033"
+              },
+              {
+                "name": "Youtube",
+                "aum_id": "GoogleInc.YouTube_yfg5n0ztvskxp!App",
+                "title_id": "122001257"
+              },
+              {
+                "name": "Destiny 2",
+                "aum_id": "Bungie.Destiny2basegame_8xb1a0vv8ay84!tiger.ReleaseFinal",
+                "title_id": "144389848"
+              }
+            ]
+          }
+        ]
+      }
     ]
   }
