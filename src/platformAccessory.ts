@@ -91,6 +91,8 @@ export class SmartglassAccessory {
       this.platform.log.debug('User is authenticated with the Xbox api. Enabling functionalities');
       this.deviceState.webApiEnabled = true;
 
+      this.getModel(this.accessory.context.device.liveid);
+
     }).catch(() => {
       this.platform.log.info('Xbox login url available at:', this.ApiClient._authentication.generateAuthorizationUrl());
       this.platform.log.info('Copy the token after login into you config: "apiToken": "<value>" to enable the Xbox api');
@@ -107,6 +109,8 @@ export class SmartglassAccessory {
           this.ApiClient._authentication.saveTokens();
           this.deviceState.webApiEnabled = true;
 
+          this.getModel(this.accessory.context.device.liveid);
+
         }).catch((error) =>{
           this.platform.log.info('User failed to authenticate:', error);
         });
@@ -119,7 +123,7 @@ export class SmartglassAccessory {
     // set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Microsoft')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Xbox Series S')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Xbox - Not authenticated')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device.liveid);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
@@ -623,7 +627,7 @@ export class SmartglassAccessory {
 
   setCurrentApplication(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     // this.launchApp(this.accessory.context.config.liveid, this.appMap[newValue.toString()].name, newValue)
-    this.platform.log.info('setCurrentApplication() invoked to ->', value);
+    this.platform.log.debug('setCurrentApplication() invoked to ->', value);
 
     const newValue = parseInt(value.toString())-1;
     const inputSourceTitleId = this.inputSources[newValue].title_id;
@@ -661,19 +665,42 @@ export class SmartglassAccessory {
     callback(null, activeInputId);
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
-   */
-  setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+  getModel(liveid: string) {
+    if(this.deviceState.webApiEnabled === true){
+      this.ApiClient.getProvider('smartglass').getConsoleStatus(liveid).then((result)=> {
+        this.platform.log.info('resolve', result.consoleType);
 
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+        let consoleType;
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+        switch(result.consoleType) {
+          case 'XboxSeriesX':
+            consoleType = 'Xbox Series X';
+            break;
+          case 'XboxSeriesS':
+            consoleType = 'Xbox Series S';
+            break;
+          case 'XboxOne':
+            consoleType = 'Xbox One';
+            break;
+          case 'XboxOneS':
+            consoleType = 'Xbox One S';
+            break;
+          case 'XboxOneX':
+            consoleType = 'Xbox One X';
+            break;
+          default:
+            consoleType = result.consoleType;
+            break;
+        }
 
-    // you must call the callback function
-    callback(null);
+
+        this.accessory.getService(this.platform.Service.AccessoryInformation)!
+          .setCharacteristic(this.platform.Characteristic.Model, consoleType);
+
+      }).catch((error)=> {
+        this.platform.log.info('reject', error);
+      });
+    }
   }
 
 }

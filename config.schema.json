@@ -5,11 +5,34 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
+      "devices": {
+        "title": "Devices",
+        "type": "array",
+        "items": {
+          "title": "Console",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true
+            },
+            "ipaddress": {
+              "title": "IP Address",
+              "type": "string",
+              "required": true
+            },
+            "liveid": {
+              "title": "Console Live ID",
+              "type": "string",
+              "required": true
+            }
+          }
+        }
+      },
+      "apiToken": {
+        "title": "Xbox API Token",
+        "type": "string"
       }
     }
   }
