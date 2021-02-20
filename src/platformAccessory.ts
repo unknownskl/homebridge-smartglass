@@ -183,6 +183,8 @@ export class SmartglassAccessory {
       if(this.deviceState.isConnected === true){
         // Client is connected
         // this.platform.log.debug('Client is already connected. Do nothing');
+
+        // @TODO: Check if we are still connected to the console.
       } else {
         // Client is not connected, try to connect
         
@@ -528,7 +530,10 @@ export class SmartglassAccessory {
         callback(null);
 
       }).catch((error) => {
-        this.platform.log.info('Error sending key input', inputKey, error);
+        this.platform.log.info('Error sending key input', inputKey, error, this.SGClient);
+        
+        // @TODO: Sometimes this.SGClient is not available. Temporary reconnect when this happens to increase reliability
+        this.connectConsole();
         callback(null);
       });
 
@@ -538,7 +543,10 @@ export class SmartglassAccessory {
         callback(null);
 
       }).catch((error) => {
-        this.platform.log.info('Error sending key input', inputKey, error);
+        this.platform.log.info('Error sending key input', inputKey, error, this.SGClient);
+        
+        // @TODO: Sometimes this.SGClient is not available. Temporary reconnect when this happens to increase reliability
+        this.connectConsole();
         callback(null);
       });
     }
