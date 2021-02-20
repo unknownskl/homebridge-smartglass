@@ -1,4 +1,4 @@
-![Homebridge-Smartglass](images/header.png){:width="500px"}
+![Homebridge-Smartglass](images/header.png)
 
 # Homebridge-Smartglass
 
