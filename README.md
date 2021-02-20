@@ -1,4 +1,6 @@
 # Homebridge-Smartglass
+
+[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.1)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_shield)
 
 
@@ -25,47 +27,54 @@ The plugin needs to be allowed to connect to your Xbox. To allow this make sure 
 
 ### Homebridge configuration
 
-Add the Accessory in your Homebridge config:
+Add the Platform in your Homebridge config:
 
-    "accessories": [
-        {
-            "accessory": "Smartglass",
-            "name": "Xbox One",
-            "liveid": "FD00000000000000",
-            "consoleip": "192.168.2.5",
-            "apps": [
-                {
-                    "name": "Spotify",
-                    "uri": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App"
-                },
-                {
-                    "name": "Youtube",
-                    "uri": "GoogleInc.YouTube_yfg5n0ztvskxp!App"
-                },
-                {
-                    "name": "Netflix",
-                    "uri": "4DF9E0F8.Netflix_mcm4njqhnhss8!App"
-                },
-                {
-                    "name": "Airserver",
-                    "uri": "F3F176BD.53203526D8F6C_p8qzvses5c8me!AirServer",
-                    "type": "Characteristic.InputSourceType.AIRPLAY"
-                }
+    "platforms": [
+      {
+        "platform": "Smartglass",
+        "devices": [
+          {
+            "name": "Xbox Series S",
+            "ipaddress": "192.168.2.9",
+            "liveid": "F400000000000000",
+            "inputs": [
+              {
+                "name": "Twitch",
+                "aum_id": "TwitchInteractive.TwitchApp_7kd9w9e3c5jra!Twitch",
+                "title_id": "442736763"
+              },
+              {
+                "name": "Spotify",
+                "aum_id": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App",
+                "title_id": "1693425033"
+              },
+              {
+                "name": "Youtube",
+                "aum_id": "GoogleInc.YouTube_yfg5n0ztvskxp!App",
+                "title_id": "122001257"
+              },
+              {
+                "name": "Destiny 2",
+                "aum_id": "Bungie.Destiny2basegame_8xb1a0vv8ay84!tiger.ReleaseFinal",
+                "title_id": "144389848"
+              }
             ]
-        }
-    ],
+          }
+        ]
+      }
+    ]
 
 | Key | Explanation |
 |-----|-------------|
+| `name` | The name of the accesory to appear in Homekit |
 | `liveid` | This needs to contain your Xbox live id. You can get this live id in the console settings. |
-| `consoleip` | This needs to contain your xbox console ip. Best is to set a static ip on the console. |
-| `apps` | This part is optional. You can define extra apps here to show them in Homekit |
+| `ipaddress` | This needs to contain your xbox console ip. Best is to set a static ip on the console. |
+| `inputs` | This part is optional. You can define extra apps here to show them in Homekit and you can launch then when you supply a title_id |
 
 
 ### Known issues
 
-- Bug: Plugin can crash homebridge sometimes, it is still in beta!
-- Only one Xbox per homebridge instance is tested.
+- TV Controls can stop working after some usage. The client will reconnect when this happens.
 
 
 ## License

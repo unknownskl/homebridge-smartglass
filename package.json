@@ -7,9 +7,12 @@
   "license": "Apache-2.0",
   "homepage": "http://github.com/unknownskl/homebridge-smartglass",
   "keywords": [
+    "homebridge",
     "homebridge-plugin",
     "xbox-one",
-    "smartglass"
+    "smartglass",
+    "xbox",
+    "xbox-series"
   ],
   "repository": {
     "type": "git",
@@ -19,7 +22,7 @@
     "url": "http://github.com/unknownskl/homebridge-smartglass/issues"
   },
   "scripts": {
-    "lint": "npm run version && eslint src/**.ts --max-warnings=3 --fix",
+    "lint": "npm run version && eslint src/**.ts --max-warnings=4 --fix",
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && npm run version && tsc",
     "prepublishOnly": "npm run lint && npm run build",
