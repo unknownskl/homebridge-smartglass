@@ -21,7 +21,7 @@ This is a plugin for Homebridge that allows you to control your xbox console. Th
 ## Requirements:
 
 - NodeJS >= 10.x
-- Homebridge >= 1.1.6
+- Homebridge >= 1.2.0
 
 ## Installation instructions
 
@@ -37,6 +37,12 @@ Install the plugin:
 ## Setting up the Xbox
 
 The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
+
+### Finding the liveid of your console
+
+Go to settings -> Console info and the liveid is displayed right there.
+
+![Xbox Console LiveID](images/xbox-liveid.png)
 
 ## Homebridge configuration
 
