@@ -1,33 +1,44 @@
 # Homebridge-Smartglass
 
 [![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.1)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_shield)
+[![npm](https://img.shields.io/npm/v/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
+[![npm](https://img.shields.io/npm/dt/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
 
 
-This module is an Accessory plugin for Homebridge which allows you to control your Xbox using Homekit and the new Remote control introduced in iOS 12.2.
-Currently still in beta.
+This is a plugin for Homebridge that allows you to control your xbox console. The following features are supported:
 
-Requirements:
+- Turn on and off
+- Show current active app using input sources
+- Allows you to launch apps and games using the input switcher *
+- Control volume on the Xbox Series *
+- Remote control using the native IOS remote
+
+
+\* *Requires to be logged in and have the console configured using the Xbox API.*
+
+## Requirements:
+
 - NodeJS >= 10.x
+- Homebridge >= 1.1.6
 
-### How to install
+## Installation instructions
 
 Install the plugin:
 
     npm install -g homebridge-smartglass
 
-### HOOBS instructions
+## Config UI X / HOOBS instructions
 
 1. Search for the plugin using `smartglass`
-2. Install plugin and configure
+2. Install plugin and configure using the UI.
 
 ## Setting up the Xbox
 
 The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
 
-### Homebridge configuration
+## Homebridge configuration
 
-Add the Platform in your Homebridge config:
+Configure the Platform in your Homebridge config like below. Replace the ip address and liveid.
 
     "platforms": [
       {
@@ -71,11 +82,17 @@ Add the Platform in your Homebridge config:
 | `ipaddress` | This needs to contain your xbox console ip. Best is to set a static ip on the console. |
 | `inputs` | This part is optional. You can define extra apps here to show them in Homekit and you can launch then when you supply a title_id |
 
+### Optional options
+
+The plugin supports optional options for configuring the plugin.
+
+| Key | Explanation |
+|-----|-------------|
+| `apiToken` | *(Optional)* After authenticating with the Xbox login url you need to paste in the token you get after the redirect in the url (`?code=<code>`) |
+| `clientId` | *(Optional)* Provide an Azure AD clientId to use your own tenant for authentication |
+| `clientSecret` | *(Optional)* Provide an Azure AD clientSecret related to the clientId to use your own tenant for authentication. Depends on app configuration if needed. |
+
 
 ### Known issues
 
 - TV Controls can stop working after some usage. The client will reconnect when this happens.
-
-
-## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Funknownskl%2Fhomebridge-smartglass?ref=badge_large)
