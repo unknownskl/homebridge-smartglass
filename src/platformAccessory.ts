@@ -243,11 +243,13 @@ export class SmartglassAccessory {
 
             // this.getAppByTitleId(this.deviceState.currentTitleId).then((result:any) => {
             //   this.platform.log.info('Set source to:', result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
-            //   inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
-            //   this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
+            //   // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
+            //   inputSource.updateCharacteristic(this.platform.Characteristic.ConfiguredName, result.LocalizedProperties[0].ShortTitle || result.LocalizedProperties[0].ProductTitle);
+            //   // this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
             // }).catch(() => {
             //   this.platform.log.info('Set source to other');
-            //   inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'Other');
+            //   inputSource.updateCharacteristic(this.platform.Characteristic.ConfiguredName, 'Other');
+            //   // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'Other');
             // });
 
             this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
@@ -283,10 +285,10 @@ export class SmartglassAccessory {
     
               // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.Products[0].LocalizedProperties[0].ShortTitle);
             } else {
-              this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id);
+              this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id);
             }
           }).catch((error) => {
-            this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id, error);
+            this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id, error);
           });
         }).catch((error) => {
           this.platform.log.info('Failed to authenticate user:', error);
@@ -321,27 +323,33 @@ export class SmartglassAccessory {
     return new Promise((resolve, reject) => {
       const appCache = this.getAppFromCache(title_id);
 
-      if(appCache !== false){
-        return resolve(appCache);
+      if(title_id === undefined || title_id === ''){
+        reject('Cannot resolve empty title_id (getAppByTitleId):'+ title_id);
       } else {
-        this.ApiClient.isAuthenticated().then(() => {
-          this.ApiClient.getProvider('catalog').getProductFromAlternateId(title_id, 'XboxTitleId').then((result) => {
-            if(result.Products[0] !== undefined){
-              this.platform.log.debug('getAppByTitleId() return app from xbox api:', result.Products[0].LocalizedProperties[0].ShortTitle, title_id);
-              this.appTitleCache.push(result.Products[0]);
-              resolve(result.Products[0]);
-            } else {
-              this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id);
+
+        if(appCache !== false){
+          return resolve(appCache);
+        } else {
+          this.ApiClient.isAuthenticated().then(() => {
+            this.ApiClient.getProvider('catalog').getProductFromAlternateId(title_id, 'XboxTitleId').then((result) => {
+              if(result.Products[0] !== undefined){
+                this.platform.log.debug('getAppByTitleId() return app from xbox api:', result.Products[0].LocalizedProperties[0].ShortTitle, title_id);
+                this.appTitleCache.push(result.Products[0]);
+                resolve(result.Products[0]);
+              } else {
+                this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppByTitleId):', title_id);
+                reject('Failed to retrieve titleid from Xbox api:'+ title_id);
+              }
+            }).catch((error) => {
+              this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppByTitleId):', title_id, error);
               reject('Failed to retrieve titleid from Xbox api:'+ title_id);
-            }
+            });
           }).catch((error) => {
-            this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id, error);
-            reject('Failed to retrieve titleid from Xbox api:'+ title_id);
+            this.platform.log.info('Failed to authenticate user:', error);
+            reject(error);
           });
-        }).catch((error) => {
-          this.platform.log.info('Failed to authenticate user:', error);
-          reject(error);
-        });
+        }
+
       }
     });
   }
@@ -615,6 +623,8 @@ export class SmartglassAccessory {
 
           this.ApiClient.getProvider('smartglass').launchApp(this.accessory.context.device.liveid, result.ProductId).then(() => {
             this.platform.log.debug('Launched app:', result.Title, '('+result.ProductId+')');
+            this.service.updateCharacteristic(this.platform.Characteristic.ActiveIdentifier, value);
+
           }).catch((error: any) => {
             this.platform.log.info('Rejected app launch (launchApp)', error);
           });
@@ -627,7 +637,7 @@ export class SmartglassAccessory {
       this.platform.log.info('Launching apps is not possible when you are not logged in to the Xbox api. Make sure the Xbox api functionalities are enabled.');
     }
 
-    callback(null, value);
+    callback(null);
   }
 
   getCurrentApplication(callback: CharacteristicSetCallback) {
