@@ -107,7 +107,8 @@ export class SmartglassAccessory {
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Microsoft')
       .setCharacteristic(this.platform.Characteristic.Model, 'Xbox - Not authenticated')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device.liveid);
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device.liveid)
+      .setCharacteristic(this.platform.Characteristic.SoftwareRevision, packageInfo.version);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -119,7 +120,6 @@ export class SmartglassAccessory {
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device.name);
     this.service.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
-    this.service.setCharacteristic(this.platform.Characteristic.FirmwareRevision, packageInfo.version);
 
     this.service.getCharacteristic(this.platform.Characteristic.Active)
       .on('set', this.setOn.bind(this))
@@ -281,8 +281,10 @@ export class SmartglassAccessory {
     
               // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.Products[0].LocalizedProperties[0].ShortTitle);
             } else {
-              this.platform.log.debug('Failed to retrieve titleid from Xbox api:', title_id);
+              this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id);
             }
+          }).catch((error) => {
+            this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id, error);
           });
         }).catch((error) => {
           this.platform.log.info('Failed to authenticate user:', error);
@@ -327,9 +329,12 @@ export class SmartglassAccessory {
               this.appTitleCache.push(result.Products[0]);
               resolve(result.Products[0]);
             } else {
-              this.platform.log.debug('Failed to retrieve titleid from Xbox api:', title_id);
+              this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id);
               reject('Failed to retrieve titleid from Xbox api:'+ title_id);
             }
+          }).catch((error) => {
+            this.platform.log.info('Failed to retrieve titleid from Xbox api:', title_id, error);
+            reject('Failed to retrieve titleid from Xbox api:'+ title_id);
           });
         }).catch((error) => {
           this.platform.log.info('Failed to authenticate user:', error);
@@ -355,32 +360,57 @@ export class SmartglassAccessory {
       this.platform.log.debug('Set Characteristic On ->', value);
       if(value === 0){
         // Power off
-        this.SGClient.powerOff().then(() => {
-          this.platform.log.debug('Powered off xbox');
-          this.deviceState.isConnected = false;
-          this.deviceState.powerState = false;
-          this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
-  
-        }).then((error) => {
-          this.platform.log.debug('Failed to turn off xbox:', error);
-          this.deviceState.isConnected = false;
-          this.deviceState.powerState = false;
-        });
+        if(this.deviceState.webApiEnabled === true){
+          this.ApiClient.getProvider('smartglass').powerOff(this.accessory.context.device.liveid).then(() => {
+            this.platform.log.debug('Powered off xbox');
+            this.deviceState.isConnected = false;
+            this.deviceState.powerState = false;
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
+
+          }).catch((error) => {
+            this.platform.log.info('Failed to turn off xbox:', error);
+            this.deviceState.isConnected = false;
+            this.deviceState.powerState = false;
+          });
+        } else {
+          this.SGClient.powerOff().then(() => {
+            this.platform.log.debug('Powered off xbox');
+            this.deviceState.isConnected = false;
+            this.deviceState.powerState = false;
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
+    
+          }).catch((error) => {
+            this.platform.log.info('Failed to turn off xbox:', error);
+            this.deviceState.isConnected = false;
+            this.deviceState.powerState = false;
+          });
+        }
       } else {
 
-        // Power on
-        this.SGClient.powerOn({
-          tries: 10,
-          ip: this.accessory.context.device.ipaddress,
-          live_id: this.accessory.context.device.liveid,
-        }).then(() => {
-          this.platform.log.debug('Powered on xbox');
-          this.deviceState.isConnected = true;
-  
-        }).then((error) => {
-          this.platform.log.debug('Failed to turn on xbox:', error);
-          this.deviceState.isConnected = false;
-        });
+        if(this.deviceState.webApiEnabled === true){
+          this.ApiClient.getProvider('smartglass').powerOn(this.accessory.context.device.liveid).then(() => {
+            this.platform.log.debug('Powered on xbox');
+            this.deviceState.isConnected = true;
+
+          }).catch((error) => {
+            this.platform.log.info('Failed to turn on xbox:', error);
+            this.deviceState.isConnected = false;
+          });
+        } else {
+          // Power on
+          this.SGClient.powerOn({
+            tries: 10,
+            ip: this.accessory.context.device.ipaddress,
+            live_id: this.accessory.context.device.liveid,
+          }).then(() => {
+            this.platform.log.debug('Powered on xbox');
+            this.deviceState.isConnected = true;
+    
+          }).catch((error) => {
+            this.platform.log.info('Failed to turn on xbox:', error);
+            this.deviceState.isConnected = false;
+          });
+        }
       }
       
     }
@@ -498,7 +528,7 @@ export class SmartglassAccessory {
         callback(null);
 
       }).catch((error) => {
-        this.platform.log.info('Error sendding key input', inputKey, error);
+        this.platform.log.info('Error sending key input', inputKey, error);
         callback(null);
       });
 
@@ -578,13 +608,15 @@ export class SmartglassAccessory {
           this.ApiClient.getProvider('smartglass').launchApp(this.accessory.context.device.liveid, result.ProductId).then(() => {
             this.platform.log.debug('Launched app:', result.Title, '('+result.ProductId+')');
           }).catch((error: any) => {
-            this.platform.log.debug('Rejected app launch', error);
+            this.platform.log.info('Rejected app launch (launchApp)', error);
           });
+        }).catch((error: any) => {
+          this.platform.log.info('Rejected app launch (getAppByTitleId)', error);
         });
       }
     } else {
       this.platform.log.info('Failed to launch app:', inputSourceTitleId);
-      this.platform.log.info('Launching apps is not possible when you are not logged in to the Xbox api. Authenticate first');
+      this.platform.log.info('Launching apps is not possible when you are not logged in to the Xbox api. Make sure the Xbox api functionalities are enabled.');
     }
 
     callback(null, value);
@@ -634,7 +666,12 @@ export class SmartglassAccessory {
           .setCharacteristic(this.platform.Characteristic.Model, consoleType);
 
       }).catch((error)=> {
-        this.platform.log.debug('Failed to get xbox console type from Xbox API:', error);
+        if(error.errorCode === 'XboxDataNotFound'){
+          this.platform.log.info('Console ID not found on connected xbox account. Disabling xbox api functionalities. Live id:', liveid);
+          this.deviceState.webApiEnabled = false;
+        } else {
+          this.platform.log.info('Failed to get xbox console type from Xbox API:', error, 'Live id:', liveid);
+        }
       });
     }
   }
