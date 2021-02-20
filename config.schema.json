@@ -8,9 +8,11 @@
     "properties": {
       "devices": {
         "title": "Xbox Consoles",
+        "description": "Configure one or more consoles.",
         "type": "array",
         "items": {
           "title": "Xbox",
+          "description": "Fill in your details of the xbox console.",
           "type": "object",
           "properties": {
             "name": {
@@ -66,6 +68,16 @@
         "title": "Xbox API Token",
         "type": "string",
         "description": "You can authenticate with the Xbox Api to enable extra features such as switching apps. Check the console for more information."
+      },
+      "clientId": {
+        "title": "Azure AD clientID",
+        "type": "string",
+        "description": "Provide an Azure AD clientId to use your own tenant for authentication. Leave blank for a default public one. (Homebridge-Smartglass)"
+      },
+      "clientSecret": {
+        "title": "Azure AD clientSecret",
+        "type": "string",
+        "description": "Provide an Azure AD clientSecret related to the clientId to use your own tenant for authentication. Depends on app configuration if needed."
       }
     }
   }
