@@ -1,3 +1,5 @@
+![Homebridge-Smartglass](images/header.png | width=500)
+
 # Homebridge-Smartglass
 
 [![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.1)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
