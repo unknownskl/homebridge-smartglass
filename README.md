@@ -38,7 +38,20 @@ Install the plugin:
 
 The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
 
-### Finding the liveid of your console
+## Authenticate with the Xbox API
+
+When you authenticate with the Xbox api using your account, you can enable the api function to switch apps and have an improved poweron and poweroff functions.
+After reloading homebridge, homebridge-smartglass will show instructions in the console on how to authenticate with the Xbox API. You can authenticatie via the following steps:
+
+- Check the log output for an link that homebridge-smartglass provides on startup
+- Authenticate with Homebridge-Smartglass to allow the application to authenticate with the Xbox API's
+- After authenticaing you will get redirected. After the redirect copy the part after `?code=` from the url
+- Add a new entry below `"liveid: "<liveid>",` with: `"apiToken": "<code>",` and restart homebridge
+- Check the logs after the restart. The console will tell you if the authentication was successful or not 
+
+Reload homebridge and you are done.
+
+## Finding the liveid of your console
 
 Go to settings -> Console info and the liveid is displayed right there.
 
