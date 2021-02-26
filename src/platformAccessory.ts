@@ -171,8 +171,7 @@ export class SmartglassAccessory {
       if(this.inputSources[id].hidden === true){
         inputSource.setCharacteristic(this.platform.Characteristic.CurrentVisibilityState, this.platform.Characteristic.CurrentVisibilityState.HIDDEN);
       }
-
-      this.platform.log.info('Adding input source', parseInt(id)+1, this.inputSources[id].name);
+      
       this.service.addLinkedService(inputSource);
     }
 
@@ -183,6 +182,9 @@ export class SmartglassAccessory {
       if(this.deviceState.isConnected === true){
         // Client is connected
         // this.platform.log.debug('Client is already connected. Do nothing');
+        
+        this.platform.log.debug('- SGCLient _connection_status:', this.SGClient._connection_status);
+        this.platform.log.debug('- SGCLient isConnected:', this.SGClient.isConnected());
 
         // @TODO: Check if we are still connected to the console.
       } else {
@@ -223,6 +225,8 @@ export class SmartglassAccessory {
       this.SGClient.on('_on_timeout', () => {
         this.platform.log.info('Smartglass connection timeout detected. Reconnecting...');
         this.deviceState.isConnected = false;
+        this.deviceState.powerState = false;
+        this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
         this.connectConsole();
       });
 
@@ -252,7 +256,7 @@ export class SmartglassAccessory {
             //   // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'Other');
             // });
 
-            this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
+            this.service.updateCharacteristic(this.platform.Characteristic.ActiveIdentifier, activeInputId);
           }
         }
       });
@@ -261,6 +265,7 @@ export class SmartglassAccessory {
       this.platform.log.debug('Failed to connect to xbox. Reason:', error);
       this.deviceState.isConnected = false;
       this.deviceState.powerState = false;
+      this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
     });
   }
 
@@ -278,18 +283,22 @@ export class SmartglassAccessory {
       } else {
         // App is not cached, get results
         this.ApiClient.isAuthenticated().then(() => {
-          this.ApiClient.getProvider('catalog').getProductFromAlternateId(title_id, 'XboxTitleId').then((result) => {
-            if(result.Products[0] !== undefined){
-              this.platform.log.debug('getAppId() return app from xbox api:', result.Products[0].LocalizedProperties[0].ShortTitle, title_id);
-              this.appTitleCache.push(result.Products[0]);
-    
-              // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.Products[0].LocalizedProperties[0].ShortTitle);
-            } else {
-              this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id);
-            }
-          }).catch((error) => {
-            this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id, error);
-          });
+          if(title_id !== '') {
+            this.ApiClient.getProvider('catalog').getProductFromAlternateId(title_id, 'XboxTitleId').then((result) => {
+              if(result.Products[0] !== undefined){
+                this.platform.log.debug('getAppId() return app from xbox api:', result.Products[0].LocalizedProperties[0].ShortTitle, title_id);
+                this.appTitleCache.push(result.Products[0]);
+      
+                // inputSource.setCharacteristic(this.platform.Characteristic.ConfiguredName, result.Products[0].LocalizedProperties[0].ShortTitle);
+              } else {
+                this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id);
+              }
+            }).catch((error) => {
+              this.platform.log.info('Failed to retrieve titleid from Xbox api (getAppId):', title_id, error);
+            });
+          } else {
+            // No app id, do nothing.
+          }
         }).catch((error) => {
           this.platform.log.info('Failed to authenticate user:', error);
         });
@@ -372,25 +381,25 @@ export class SmartglassAccessory {
         // Power off
         if(this.deviceState.webApiEnabled === true){
           this.ApiClient.getProvider('smartglass').powerOff(this.accessory.context.device.liveid).then(() => {
-            this.platform.log.debug('Powered off xbox');
+            this.platform.log.debug('Powered off xbox using xbox api');
             this.deviceState.isConnected = false;
             this.deviceState.powerState = false;
-            this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
+            // this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
 
           }).catch((error) => {
-            this.platform.log.info('Failed to turn off xbox:', error);
+            this.platform.log.info('Failed to turn off xbox using xbox api:', error);
             this.deviceState.isConnected = false;
             this.deviceState.powerState = false;
           });
         } else {
           this.SGClient.powerOff().then(() => {
-            this.platform.log.debug('Powered off xbox');
+            this.platform.log.debug('Powered off xbox using smartglass');
             this.deviceState.isConnected = false;
             this.deviceState.powerState = false;
-            this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
+            // this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
     
           }).catch((error) => {
-            this.platform.log.info('Failed to turn off xbox:', error);
+            this.platform.log.info('Failed to turn off xbox using smartglass:', error);
             this.deviceState.isConnected = false;
             this.deviceState.powerState = false;
           });
@@ -399,12 +408,14 @@ export class SmartglassAccessory {
 
         if(this.deviceState.webApiEnabled === true){
           this.ApiClient.getProvider('smartglass').powerOn(this.accessory.context.device.liveid).then(() => {
-            this.platform.log.debug('Powered on xbox');
-            this.deviceState.isConnected = true;
+            this.platform.log.debug('Powered on xbox using xbox api');
+            this.deviceState.powerState = true;
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
 
           }).catch((error) => {
-            this.platform.log.info('Failed to turn on xbox:', error);
+            this.platform.log.info('Failed to turn on xbox using xbox api:', error);
             this.deviceState.isConnected = false;
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
           });
         } else {
           // Power on
@@ -413,11 +424,12 @@ export class SmartglassAccessory {
             ip: this.accessory.context.device.ipaddress,
             live_id: this.accessory.context.device.liveid,
           }).then(() => {
-            this.platform.log.debug('Powered on xbox');
-            this.deviceState.isConnected = true;
+            this.platform.log.debug('Powered on xbox using smartglass');
+            this.deviceState.powerState = true;
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
     
           }).catch((error) => {
-            this.platform.log.info('Failed to turn on xbox:', error);
+            this.platform.log.info('Failed to turn on xbox using smartglass:', error);
             this.deviceState.isConnected = false;
           });
         }
@@ -637,7 +649,7 @@ export class SmartglassAccessory {
       this.platform.log.info('Launching apps is not possible when you are not logged in to the Xbox api. Make sure the Xbox api functionalities are enabled.');
     }
 
-    callback(null);
+    callback(null, value);
   }
 
   getCurrentApplication(callback: CharacteristicSetCallback) {
