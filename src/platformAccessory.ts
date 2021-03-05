@@ -718,6 +718,18 @@ export class SmartglassAccessory {
         } else {
           this.platform.log.info('Failed to get xbox console type from Xbox API:', error, 'Live id:', liveid);
         }
+
+        this.ApiClient.getProvider('smartglass').getConsolesList().then((result)=> {
+          // this.platform.log.info(result);
+          this.platform.log.info('Available consoles:');
+
+          for(const console in result.result){
+            // this.platform.log.info('- Name:', result.result[console].name, ' - Console Type:', result.result[console].consoleType, ' - Console Live ID:', result.result[console].id);
+            this.platform.log.info('- ['+result.result[console].id+' - '+result.result[console].consoleType+']', result.result[console].name);
+          }
+        }).catch((error)=> {
+          this.platform.log.info('Failed to get console list:', error);
+        });
       });
     }
   }
