@@ -380,12 +380,18 @@ export class SmartglassAccessory {
       if(value === 0){
         // Power off
         if(this.deviceState.webApiEnabled === true){
-          this.ApiClient.getProvider('smartglass').powerOff(this.accessory.context.device.liveid).then(() => {
-            this.platform.log.debug('Powered off xbox using xbox api');
-            this.deviceState.isConnected = false;
-            this.deviceState.powerState = false;
-            // this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
+          this.ApiClient.isAuthenticated().then(() => {
+            this.ApiClient.getProvider('smartglass').powerOff(this.accessory.context.device.liveid).then(() => {
+              this.platform.log.debug('Powered off xbox using xbox api');
+              this.deviceState.isConnected = false;
+              this.deviceState.powerState = false;
+              // this.service.updateCharacteristic(this.platform.Characteristic.Active, 0);
 
+            }).catch((error) => {
+              this.platform.log.info('Failed to turn off xbox using xbox api:', error);
+              this.deviceState.isConnected = false;
+              this.deviceState.powerState = false;
+            });
           }).catch((error) => {
             this.platform.log.info('Failed to turn off xbox using xbox api:', error);
             this.deviceState.isConnected = false;
@@ -407,11 +413,17 @@ export class SmartglassAccessory {
       } else {
 
         if(this.deviceState.webApiEnabled === true){
-          this.ApiClient.getProvider('smartglass').powerOn(this.accessory.context.device.liveid).then(() => {
-            this.platform.log.debug('Powered on xbox using xbox api');
-            this.deviceState.powerState = true;
-            this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
+          this.ApiClient.isAuthenticated().then(() => {
+            this.ApiClient.getProvider('smartglass').powerOn(this.accessory.context.device.liveid).then(() => {
+              this.platform.log.debug('Powered on xbox using xbox api');
+              this.deviceState.powerState = true;
+              this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
 
+            }).catch((error) => {
+              this.platform.log.info('Failed to turn on xbox using xbox api:', error);
+              this.deviceState.isConnected = false;
+              this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
+            });
           }).catch((error) => {
             this.platform.log.info('Failed to turn on xbox using xbox api:', error);
             this.deviceState.isConnected = false;
@@ -630,18 +642,22 @@ export class SmartglassAccessory {
 
       if(inputSourceTitleId !== undefined){
         // Got titleid, launch app.
-        this.getAppByTitleId(inputSourceTitleId).then((result:any) => {
-          // console.log('Launch product id:', result.ProductId);
+        this.ApiClient.isAuthenticated().then(() => {
+          this.getAppByTitleId(inputSourceTitleId).then((result:any) => {
+            // console.log('Launch product id:', result.ProductId);
 
-          this.ApiClient.getProvider('smartglass').launchApp(this.accessory.context.device.liveid, result.ProductId).then(() => {
-            this.platform.log.debug('Launched app:', result.Title, '('+result.ProductId+')');
-            this.service.updateCharacteristic(this.platform.Characteristic.ActiveIdentifier, value);
+            this.ApiClient.getProvider('smartglass').launchApp(this.accessory.context.device.liveid, result.ProductId).then(() => {
+              this.platform.log.debug('Launched app:', result.Title, '('+result.ProductId+')');
+              this.service.updateCharacteristic(this.platform.Characteristic.ActiveIdentifier, value);
 
+            }).catch((error: any) => {
+              this.platform.log.info('Rejected app launch (launchApp)', error);
+            });
           }).catch((error: any) => {
-            this.platform.log.info('Rejected app launch (launchApp)', error);
+            this.platform.log.info('Rejected app launch (getAppByTitleId)', error);
           });
         }).catch((error: any) => {
-          this.platform.log.info('Rejected app launch (getAppByTitleId)', error);
+          this.platform.log.info('Rejected app launch (isAuthenticated)', error);
         });
       }
     } else {
