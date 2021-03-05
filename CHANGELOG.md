@@ -4,6 +4,10 @@
 ## v1.0.1 -  TBD
 - Complete rewrite of the Smartglass plugin with xbox api functionalities.
 
+## 1.0.1-beta.6 -  2021-03-05
+- Fixed a bug where the plugin could not turn on the console using the Xbox api because the tokens where expired
+- Log available consoles to log when supplied an incorrect console live id
+
 ## 1.0.1-beta.5 -  2021-02-27
 - Improved powerstate reliability
 
