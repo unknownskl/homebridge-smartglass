@@ -1,49 +1,83 @@
 {
   "pluginAlias": "Smartglass",
-  "pluginType": "accessory",
-  "footerDisplay": "This plugin works with Xbox One which is available [here](https://github.com/unknownskl/homebridge-smartglass).",
+  "pluginType": "platform",
+  "singular": true,
+  "footerDisplay": "For documentation please see [GitHub repository](https://github.com/unknownskl/homebridge-smartglass)",
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "default": "Xbox One",
-        "required": true
-      },
-      "liveid": {
-        "title": "Live ID",
-        "type": "string",
-        "default": "FD00000000",
-        "required": true
-      },
-      "consoleip": {
-        "title": "IP Address",
-        "type": "string",
-        "required": true,
-        "format": "hostname",
-        "required": true
-      },
-      "apps": {
-        "name": "apps",
+      "devices": {
+        "title": "Xbox Consoles",
+        "description": "Configure one or more consoles.",
         "type": "array",
         "items": {
+          "title": "Xbox",
+          "description": "Fill in your details of the xbox console.",
           "type": "object",
           "properties": {
             "name": {
-              "title": "App name",
+              "title": "Name",
               "type": "string",
-              "default": "Spotify",
               "required": true
             },
-            "uri": {
-              "title": "App reference",
+            "ipaddress": {
+              "title": "IP Address",
               "type": "string",
-               "default": "SpotifyAB.SpotifyMusic-forXbox_zpdnekdrzrea0!App",
-              "required": true
+              "required": true,
+              "format": "ipv4",
+              "placeholder": "192.168.1.55"
+            },
+            "liveid": {
+              "title": "Console Live ID",
+              "type": "string",
+              "required": true,
+              "pattern": "^F[A-Fa-f0-9]{15}$",
+              "description": "Your Console Live ID can be found in the settings.",
+              "placeholder": "F000000000000000"
+            },
+            "inputs": {
+              "title": "Source inputs",
+              "type": "array",
+              "items": {
+                "title": "Input",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "required": true
+                  },
+                  "aum_id": {
+                    "title": "Aum title ID",
+                    "type": "string",
+                    "required": true,
+                    "description": "Required to detect which application or game is currently running."
+                  },
+                  "title_id": {
+                    "title": "Title ID",
+                    "type": "string",
+                    "description": "The title id makes it possible to switch the app on the xbox console."
+                  }
+                }
+              }
             }
           }
         }
+      },
+      "apiToken": {
+        "title": "Xbox API Token",
+        "type": "string",
+        "description": "You can authenticate with the Xbox Api to enable extra features such as switching apps. Check the console for more information."
+      },
+      "clientId": {
+        "title": "Azure AD clientID",
+        "type": "string",
+        "description": "Provide an Azure AD clientId to use your own tenant for authentication. Leave blank for a default public one. (Homebridge-Smartglass)"
+      },
+      "clientSecret": {
+        "title": "Azure AD clientSecret",
+        "type": "string",
+        "description": "Provide an Azure AD clientSecret related to the clientId to use your own tenant for authentication. Depends on app configuration if needed."
       }
     }
   }
