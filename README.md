@@ -21,7 +21,7 @@ This is a plugin for Homebridge that allows you to control your xbox console. Th
 ## Requirements:
 
 - NodeJS >= 10.x
-- Homebridge >= 1.2.0
+- Homebridge >= 1.3.0
 
 ## Installation instructions
 
