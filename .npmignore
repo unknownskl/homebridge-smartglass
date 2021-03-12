@@ -1,10 +1,22 @@
-# Ignore compiled code
-dist
-.homebridge/accessories
-.homebridge/persist
-.homebridge/.*.tokens.json
+# Ignore source code
+src
 
 # ------------- Defaults ------------- #
+
+# gitHub actions
+.github
+
+# eslint
+.eslintrc
+
+# typescript
+tsconfig.json
+
+# vscode
+.vscode
+
+# nodemon
+nodemon.json
 
 # Logs
 logs
@@ -121,4 +133,6 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
-package-info.json
+.tokens.json
+.homebridge
+*.diff
