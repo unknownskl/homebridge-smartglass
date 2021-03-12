@@ -1,8 +1,7 @@
 # Changelog
 
-
-## v1.0.1 -  TBD
-- Complete rewrite of the Smartglass plugin with xbox api functionalities.
+## v1.0.1 -  2021-03-12
+- Complete rewrite of the Smartglass plugin with xbox api functionalities. Allows you to launch apps and have realtime status of your console.
 
 ## 1.0.1-beta.6 -  2021-03-05
 - Fixed a bug where the plugin could not turn on the console using the Xbox api because the tokens where expired
