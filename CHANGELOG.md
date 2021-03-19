@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.2 -  2021-03-19
+- Fixed a bug that can crash homebridge when no devices are defined in the config
+
 ## v1.0.1 -  2021-03-12
 - Complete rewrite of the Smartglass plugin with xbox api functionalities. Allows you to launch apps and have realtime status of your console.
 
