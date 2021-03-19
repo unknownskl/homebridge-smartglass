@@ -2,7 +2,7 @@
 
 # Homebridge-Smartglass
 
-[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.1)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
+[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.2)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
 [![npm](https://img.shields.io/npm/dt/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
 
