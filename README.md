@@ -2,9 +2,11 @@
 
 # Homebridge-Smartglass
 
-[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.2)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
 [![npm](https://img.shields.io/npm/dt/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
+
 
 
 This is a plugin for Homebridge that allows you to control your xbox console. The following features are supported:
