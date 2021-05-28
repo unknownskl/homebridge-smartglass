@@ -2,9 +2,11 @@
 
 # Homebridge-Smartglass
 
-[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg?branch=release%2F1.0.2)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![Build and Lint](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml/badge.svg)](https://github.com/unknownskl/homebridge-smartglass/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
 [![npm](https://img.shields.io/npm/dt/homebridge-smartglass.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-smartglass)
+
 
 
 This is a plugin for Homebridge that allows you to control your xbox console. The following features are supported:
@@ -38,6 +40,14 @@ Install the plugin:
 
 The plugin needs to be allowed to connect to your Xbox. To allow this make sure you set the setting to allow anonymous connections in Settings -> Devices -> Connections on the Xbox.
 
+Your xbox also needs to be in instant-on mode.
+
+## Finding the liveid of your console
+
+Go to settings -> Console info and the liveid is displayed right there.
+
+![Xbox Console LiveID](images/xbox-liveid.png)
+
 ## Authenticate with the Xbox API
 
 When you authenticate with the Xbox api using your account, you can enable the api function to switch apps and have an improved poweron and poweroff functions.
@@ -50,12 +60,6 @@ After reloading homebridge, homebridge-smartglass will show instructions in the 
 - Check the logs after the restart. The console will tell you if the authentication was successful or not 
 
 Reload homebridge and you are done.
-
-## Finding the liveid of your console
-
-Go to settings -> Console info and the liveid is displayed right there.
-
-![Xbox Console LiveID](images/xbox-liveid.png)
 
 ## Homebridge configuration
 
@@ -113,6 +117,11 @@ The plugin supports optional options for configuring the plugin.
 | `clientId` | *(Optional)* Provide an Azure AD clientId to use your own tenant for authentication |
 | `clientSecret` | *(Optional)* Provide an Azure AD clientSecret related to the clientId to use your own tenant for authentication. Depends on app configuration if needed. |
 
+## How can i find the aum_id and title_id?
+
+There are 2 ways: You can get the data from the homebridge logs when you are authenticated with the xbox live api or you can try to find if the app or game is listed in a community user GitHub repository which can be found here: [https://github.com/PewDieMelon/app-list-for-homebridge-smartglass](https://github.com/PewDieMelon/app-list-for-homebridge-smartglass)
+
+The Readme of the above listed repository also shows you how to get the aum_id and title_id via the console itself (In case you cannot check the homebridge log)
 
 ### Known issues
 
