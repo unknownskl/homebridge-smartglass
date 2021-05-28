@@ -119,8 +119,9 @@ The plugin supports optional options for configuring the plugin.
 
 ## How can i find the aum_id and title_id?
 
-There are 2 ways. You can get the data from the homebridge logs when you are authenticated with the xbox live api or you can try to find if the app or game is listed in a community user GitHub repository which can be found here: [https://github.com/PewDieMelon/app-list-for-homebridge-smartglass](https://github.com/PewDieMelon/app-list-for-homebridge-smartglass)
-The Readme of the above listed repository shows you also how to get the aum_id and title_id via the console itself (In case you cannot check the homebridge log)
+There are 2 ways: You can get the data from the homebridge logs when you are authenticated with the xbox live api or you can try to find if the app or game is listed in a community user GitHub repository which can be found here: [https://github.com/PewDieMelon/app-list-for-homebridge-smartglass](https://github.com/PewDieMelon/app-list-for-homebridge-smartglass)
+
+The Readme of the above listed repository also shows you how to get the aum_id and title_id via the console itself (In case you cannot check the homebridge log)
 
 ### Known issues
 
