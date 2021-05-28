@@ -117,6 +117,10 @@ The plugin supports optional options for configuring the plugin.
 | `clientId` | *(Optional)* Provide an Azure AD clientId to use your own tenant for authentication |
 | `clientSecret` | *(Optional)* Provide an Azure AD clientSecret related to the clientId to use your own tenant for authentication. Depends on app configuration if needed. |
 
+## How can i find the aum_id and title_id?
+
+There are 2 ways. You can get the data from the homebridge logs when you are authenticated with the xbox live api or you can try to find if the app or game is listed in a community user GitHub repository which can be found here: [https://github.com/PewDieMelon/app-list-for-homebridge-smartglass](https://github.com/PewDieMelon/app-list-for-homebridge-smartglass)
+The Readme of the above listed repository shows you also how to get the aum_id and title_id via the console itself (In case you cannot check the homebridge log)
 
 ### Known issues
 
