@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.3 -  2021-05-29
+- Bump lodash version
+- We are now homebridge verified!
+
 ## v1.0.2 -  2021-03-19
 - Fixed a bug that can crash homebridge when no devices are defined in the config
 
