@@ -35,11 +35,11 @@ jobs:
       if: ${{ contains(steps.tag_name.outputs.SOURCE_TAG, 'beta') }}
       uses: JS-DevTools/npm-publish@v1
       with:
-        token: ${{ secrets.NPM_TOKEN }}
+        token: ${{ secrets.NPM_SECRET }}
         tag: beta
 
     - name: NPM publish package
       if: ${{ !contains(steps.tag_name.outputs.SOURCE_TAG, 'beta') }}
       uses: JS-DevTools/npm-publish@v1
       with:
-        token: ${{ secrets.NPM_TOKEN }}
+        token: ${{ secrets.NPM_SECRET }}
