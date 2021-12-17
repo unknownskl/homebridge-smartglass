@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.4 -  TBD
+## v1.0.4 -  2021-12-17
 - Updated dependencies
 
 ## v1.0.3 -  2021-05-29
