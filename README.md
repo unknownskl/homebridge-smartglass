@@ -68,6 +68,7 @@ Configure the Platform in your Homebridge config like below. Replace the ip addr
     "platforms": [
       {
         "platform": "Smartglass",
+        // "apiToken": "<token>", // Only add this when you have to set the token. 
         "devices": [
           {
             "name": "Xbox Series S",
