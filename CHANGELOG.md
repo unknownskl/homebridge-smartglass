@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.4 -  TBD
+- Updated dependencies
+
 ## v1.0.3 -  2021-05-29
 - Bump lodash version
 - We are now homebridge verified!
